@@ -42,6 +42,7 @@ export default function App() {
   const [benchmarkError, setBenchmarkError] = useState<string | null>(null);
   const [benchmarkRetry, setBenchmarkRetry] = useState(0);
   const [researchBudget, setResearchBudget] = useState(0.2);
+  const [researchAttacker, setResearchAttacker] = useState("adaptive_rf");
   const previewController = useRef<AbortController | null>(null);
   const { run, error: runError, submit, retry, busy } = useRun();
   const result = run?.result || null;
@@ -118,6 +119,8 @@ export default function App() {
           data={result?.benchmarks || benchmarks}
           budget={researchBudget}
           onBudgetChange={setResearchBudget}
+          attacker={researchAttacker}
+          onAttackerChange={setResearchAttacker}
         />
         <div className="hero">
           <div>
@@ -214,6 +217,8 @@ export default function App() {
               onRetry={() => setBenchmarkRetry((x) => x + 1)}
               researchBudget={researchBudget}
               onResearchBudgetChange={setResearchBudget}
+              researchAttacker={researchAttacker}
+              onResearchAttackerChange={setResearchAttacker}
             />
             <CircuitComparison preview={preview} result={result} />
             {result && (

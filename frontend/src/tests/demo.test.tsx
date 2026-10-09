@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import App from "../App";
@@ -163,20 +169,85 @@ describe("circuit interactions", () => {
 });
 
 describe("full frontend workflow", () => {
+  it("updates the top accuracy card for every saved attacker and budget and syncs both selectors", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(api, "options").mockResolvedValue(options);
+    render(<App />);
+    const overview = screen.getByRole("region", {
+      name: "Before and after firewall accuracy",
+    });
+    await waitFor(() =>
+      expect(within(overview).getByText("93.75%")).toBeTruthy(),
+    );
+    for (const budget of recordedBenchmarks.budgets) {
+      await user.selectOptions(
+        screen.getByLabelText("Saved research budget"),
+        String(budget.budget),
+      );
+      for (const [attacker, metrics] of Object.entries(budget.attackers)) {
+        await user.selectOptions(
+          screen.getByLabelText("Saved attacker test"),
+          attacker,
+        );
+        const after = within(overview).getByText(
+          "After firewall accuracy",
+        ).parentElement!;
+        expect(
+          within(after).getByText(`${(metrics.accuracy * 100).toFixed(2)}%`),
+        ).toBeTruthy();
+        expect(
+          (screen.getByLabelText("Protected attacker") as HTMLSelectElement)
+            .value,
+        ).toBe(attacker);
+      }
+    }
+    await user.selectOptions(
+      screen.getByLabelText("Protected attacker"),
+      "adaptive_logreg",
+    );
+    expect(
+      (screen.getByLabelText("Saved attacker test") as HTMLSelectElement).value,
+    ).toBe("adaptive_logreg");
+    expect(
+      within(overview).getByText("Before firewall accuracy (RF reference)"),
+    ).toBeTruthy();
+    expect(
+      within(overview).getByText(
+        /A separate before-firewall score for this attacker is not recorded/,
+      ),
+    ).toBeTruthy();
+  });
   it("shows before/after accuracy above the hero and keeps research budgets in sync", async () => {
     const user = userEvent.setup();
     vi.spyOn(api, "options").mockResolvedValue(options);
     render(<App />);
-    const overview = await screen.findByRole("region", { name: "Before and after firewall accuracy" });
-    await waitFor(() => expect(within(overview).getByText("93.75%")).toBeTruthy());
+    const overview = await screen.findByRole("region", {
+      name: "Before and after firewall accuracy",
+    });
+    await waitFor(() =>
+      expect(within(overview).getByText("93.75%")).toBeTruthy(),
+    );
     expect(within(overview).getByText("100.00%")).toBeTruthy();
     expect(within(overview).getByText("Before firewall accuracy")).toBeTruthy();
     expect(within(overview).getByText("After firewall accuracy")).toBeTruthy();
-    expect(overview.compareDocumentPosition(screen.getByRole("heading", { level: 1 })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    await user.selectOptions(screen.getByLabelText("Saved research budget"), "0.5");
+    expect(
+      overview.compareDocumentPosition(
+        screen.getByRole("heading", { level: 1 }),
+      ) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    await user.selectOptions(
+      screen.getByLabelText("Saved research budget"),
+      "0.5",
+    );
     expect(within(overview).getByText("62.50%")).toBeTruthy();
-    expect((screen.getByLabelText("Research budget") as HTMLSelectElement).value).toBe("0.5");
-    expect(screen.getByRole("link", { name: "Confusion matrices & full metrics ↓" }).getAttribute("href")).toBe("#attacker-accuracy");
+    expect(
+      (screen.getByLabelText("Research budget") as HTMLSelectElement).value,
+    ).toBe("0.5");
+    expect(
+      screen
+        .getByRole("link", { name: "Confusion matrices & full metrics ↓" })
+        .getAttribute("href"),
+    ).toBe("#attacker-accuracy");
   });
   it("loads options, previews, submits current settings, polls, and shows evidence and exports", async () => {
     const user = userEvent.setup();

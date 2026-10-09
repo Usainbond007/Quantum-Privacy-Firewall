@@ -37,13 +37,19 @@ html {
   color: #a9c1b0;
   flex-shrink: 0;
 }
+.accuracy-summary-filters {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
 .accuracy-summary-heading select {
   display: block;
   background: #101c15;
   border: 1px solid #4b6952;
   color: #d2ebd9;
   border-radius: 4px;
-  width: 140px;
+  min-width: 110px;
+  max-width: 250px;
   padding: 7px 10px;
   margin-top: 7px;
 }

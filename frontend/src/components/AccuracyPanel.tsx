@@ -6,15 +6,9 @@ import type {
   ResearchBenchmarks,
 } from "../types/demo";
 import { FAMILY_LABELS } from "./CircuitControls";
+import { ATTACKER_NAMES as names, usesBaselineRF } from "../lib/benchmarks";
 
 const percent = (value: number) => `${(value * 100).toFixed(2)}%`;
-const names: Record<string, string> = {
-  static_baseline_rf: "Static random forest",
-  adaptive_rf: "Adaptive random forest",
-  adaptive_logreg: "Adaptive logistic regression",
-  adaptive_gboost: "Adaptive gradient boosting",
-  adaptive_rf_normalization_aware: "Normalization-aware random forest",
-};
 
 function ConfusionMatrix({
   metrics,
@@ -125,6 +119,8 @@ export function AccuracyPanel({
   onRetry,
   researchBudget,
   onResearchBudgetChange,
+  researchAttacker,
+  onResearchAttackerChange,
 }: {
   benchmarks: ResearchBenchmarks | null;
   result: DemoResult | null;
@@ -132,11 +128,15 @@ export function AccuracyPanel({
   onRetry: () => void;
   researchBudget?: number;
   onResearchBudgetChange?: (value: number) => void;
+  researchAttacker?: string;
+  onResearchAttackerChange?: (value: string) => void;
 }) {
   const [localBudget, setLocalBudget] = useState(0.2);
   const budget = researchBudget ?? localBudget;
   const setBudget = onResearchBudgetChange ?? setLocalBudget;
-  const [attacker, setAttacker] = useState("adaptive_rf");
+  const [localAttacker, setLocalAttacker] = useState("adaptive_rf");
+  const attacker = researchAttacker ?? localAttacker;
+  const setAttacker = onResearchAttackerChange ?? setLocalAttacker;
   const data = result?.benchmarks || benchmarks;
   const entry =
     data?.budgets.find((b) => Math.abs(b.budget - budget) < 1e-9) ||
@@ -196,6 +196,13 @@ export function AccuracyPanel({
         <>
           <div className="benchmark-context">
             <p>{data.note}</p>
+            {!usesBaselineRF(attacker) && (
+              <p>
+                Before-firewall metrics use the saved original random-forest
+                reference. Separate before scores for this attacker are not
+                recorded.
+              </p>
+            )}
             <span className="mono">
               {data.backend} · widths {data.widths.join("/")} · optimization{" "}
               {data.optimization_levels.join("/")} · {data.test_circuits}{" "}
