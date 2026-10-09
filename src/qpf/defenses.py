@@ -42,10 +42,10 @@ def random_reorder(qc, rng):
     assert out.size() == qc.size()
     return out
 
-def apply_strategy(base, strategy, seed):
+def apply_strategy(base, strategy, seed, backend_name="FakeNighthawk"):
     """-> (candidate logical circuit, initial_layout or None). Deterministic in (strategy, seed)."""
     rng = np.random.default_rng(int(seed)); parts = strategy.split("+"); cand, layout = base, None
     if "decomp" in parts: cand = decompose_rewrite(cand, rng)
     if "reorder" in parts: cand = random_reorder(cand, rng)
-    if "layout" in parts: layout = compilation.random_connected_layout(base.num_qubits, rng)
+    if "layout" in parts: layout = compilation.random_connected_layout(base.num_qubits, rng, name=backend_name)
     return cand, layout
