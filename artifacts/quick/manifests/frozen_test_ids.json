@@ -1,0 +1,14 @@
+{
+  "test_base_ids": [
+    "graph_ghz-w8-000",
+    "graph_ghz-w8-004",
+    "grover-w6-000",
+    "grover-w8-002",
+    "qaoa-w6-002",
+    "qaoa-w8-000",
+    "qft-w6-002",
+    "qft-w8-002",
+    "random-w6-004",
+    "random-w8-000"
+  ]
+}

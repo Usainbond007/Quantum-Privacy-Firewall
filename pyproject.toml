@@ -1,0 +1,10 @@
+[project]
+name = "quantum-privacy-firewall"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = ["qiskit", "qiskit-ibm-runtime", "scikit-learn", "numpy", "pandas", "networkx", "pyyaml", "matplotlib", "mqt.qcec", "joblib"]
+[tool.setuptools.packages.find]
+where = ["src"]
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

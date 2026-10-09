@@ -1,0 +1,2 @@
+budgets: [0.0, 0.1, 0.2, 0.5]    # relative overhead caps; 0/10/20 from plan, 50 added as an "extreme" point
+verification: {operator_max_qubits: 10, qcec_timeout_s: 60}
