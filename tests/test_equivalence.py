@@ -41,3 +41,14 @@ def test_qcec_agrees_with_operator_if_available():
     base = circuits.make_circuit("qft", 6, 4); good, _ = defenses.apply_strategy(base, "decomp", 2); bad = good.copy(); bad.x(0)
     assert verification.verify(base, good, operator_max_qubits=0).status == "PASS"
     assert verification.verify(base, bad, operator_max_qubits=0).status == "FAIL"
+
+
+def test_reordering_is_proven_by_dag_identity_and_wrong_circuit_never_passes():
+    import numpy as np
+    from qiskit import QuantumCircuit
+    from qpf import verification, defenses, paper_circuits as PC
+    base = PC.make_source("qft_swaps", 20, 0); cand, _ = defenses.apply_strategy(base, "reorder", 3)
+    assert verification.verify(base, cand).status == "PASS"
+    assert verification.verify(base, cand).method in ("dag_identity",)
+    a = QuantumCircuit(3); a.cx(0, 1); a.cx(1, 2); r = QuantumCircuit(3); r.cx(1, 2); r.cx(0, 1)
+    assert verification.verify(a, r).status != "PASS"
