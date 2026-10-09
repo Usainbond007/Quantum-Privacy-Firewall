@@ -19,6 +19,11 @@ def verify(orig, cand, operator_max_qubits=10, qcec_timeout_s=60):
         return Verdict("FAIL", "width_mismatch")
     n = orig.num_qubits
     try:
+        # Sound fast path: identical dependency DAG (same operations, same per-qubit order) => identical unitary.
+        # A dependency-respecting reordering is therefore proven equivalent in linear time, with no size limit.
+        from qiskit.converters import circuit_to_dag
+        if circuit_to_dag(orig) == circuit_to_dag(cand):
+            return Verdict("PASS", "dag_identity", "same operations and per-qubit order (reordering only)")
         if n <= operator_max_qubits:
             ok = Operator(orig).equiv(Operator(cand))
             return Verdict("PASS" if ok else "FAIL", "operator_equiv", "unitary equal up to global phase")
@@ -26,7 +31,7 @@ def verify(orig, cand, operator_max_qubits=10, qcec_timeout_s=60):
         if q is None: return Verdict("UNKNOWN", "none", "no checker available for this width")
         res = q.verify(orig, cand, timeout=float(qcec_timeout_s))
         e = str(res.equivalence).split(".")[-1].lower()
-        if e.startswith("equivalent"): return Verdict("PASS", "mqt_qcec", e)
+        if e in ("equivalent", "equivalent_up_to_global_phase"): return Verdict("PASS", "mqt_qcec", e)
         if e == "not_equivalent": return Verdict("FAIL", "mqt_qcec", e)
         return Verdict("UNKNOWN", "mqt_qcec", e)       # probably_equivalent / no_information are NOT proofs
     except Exception as ex:

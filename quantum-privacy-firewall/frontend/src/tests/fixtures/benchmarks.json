@@ -1,0 +1,461 @@
+{
+  "status": "available",
+  "note": "Saved quick-profile frozen-test evaluation, recomputed from prediction CSVs. These dataset metrics are not measurements of the current demo run.",
+  "profile": "quick",
+  "backend": "FakeNighthawk",
+  "widths": [6, 8],
+  "optimization_levels": [0, 2],
+  "test_rows": 16,
+  "test_circuits": 8,
+  "chance": 0.25,
+  "baseline": {
+    "accuracy": 0.9375,
+    "balanced_accuracy": 0.9375,
+    "macro_f1": 0.9365079365079365,
+    "confusion": [
+      [4, 0, 0, 0],
+      [0, 4, 0, 0],
+      [1, 0, 3, 0],
+      [0, 0, 0, 4]
+    ],
+    "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+    "support": {
+      "qft": 4,
+      "grover": 4,
+      "qaoa": 4,
+      "graph_ghz": 4
+    }
+  },
+  "controls": {
+    "shuffled": {
+      "accuracy": 0.4375,
+      "balanced_accuracy": 0.4375,
+      "macro_f1": 0.40880230880230883,
+      "confusion": [
+        [1, 0, 3, 0],
+        [1, 1, 1, 1],
+        [1, 0, 1, 2],
+        [0, 0, 0, 4]
+      ],
+      "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+      "support": {
+        "qft": 4,
+        "grover": 4,
+        "qaoa": 4,
+        "graph_ghz": 4
+      }
+    },
+    "metadata_only": {
+      "accuracy": 0.875,
+      "balanced_accuracy": 0.875,
+      "macro_f1": 0.8740079365079365,
+      "confusion": [
+        [4, 0, 0, 0],
+        [0, 4, 0, 0],
+        [1, 0, 3, 0],
+        [0, 0, 1, 3]
+      ],
+      "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+      "support": {
+        "qft": 4,
+        "grover": 4,
+        "qaoa": 4,
+        "graph_ghz": 4
+      }
+    }
+  },
+  "budgets": [
+    {
+      "budget": 0.0,
+      "attackers": {
+        "static_baseline_rf": {
+          "accuracy": 0.875,
+          "balanced_accuracy": 0.875,
+          "macro_f1": 0.8740079365079365,
+          "confusion": [
+            [3, 1, 0, 0],
+            [0, 4, 0, 0],
+            [1, 0, 3, 0],
+            [0, 0, 0, 4]
+          ],
+          "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+          "support": {
+            "qft": 4,
+            "grover": 4,
+            "qaoa": 4,
+            "graph_ghz": 4
+          }
+        },
+        "adaptive_rf": {
+          "accuracy": 0.9375,
+          "balanced_accuracy": 0.9375,
+          "macro_f1": 0.9365079365079365,
+          "confusion": [
+            [4, 0, 0, 0],
+            [0, 4, 0, 0],
+            [1, 0, 3, 0],
+            [0, 0, 0, 4]
+          ],
+          "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+          "support": {
+            "qft": 4,
+            "grover": 4,
+            "qaoa": 4,
+            "graph_ghz": 4
+          }
+        },
+        "adaptive_logreg": {
+          "accuracy": 0.8125,
+          "balanced_accuracy": 0.8125,
+          "macro_f1": 0.8174603174603174,
+          "confusion": [
+            [3, 0, 0, 1],
+            [1, 3, 0, 0],
+            [1, 0, 3, 0],
+            [0, 0, 0, 4]
+          ],
+          "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+          "support": {
+            "qft": 4,
+            "grover": 4,
+            "qaoa": 4,
+            "graph_ghz": 4
+          }
+        },
+        "adaptive_gboost": {
+          "accuracy": 0.9375,
+          "balanced_accuracy": 0.9375,
+          "macro_f1": 0.9365079365079365,
+          "confusion": [
+            [4, 0, 0, 0],
+            [0, 4, 0, 0],
+            [1, 0, 3, 0],
+            [0, 0, 0, 4]
+          ],
+          "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+          "support": {
+            "qft": 4,
+            "grover": 4,
+            "qaoa": 4,
+            "graph_ghz": 4
+          }
+        },
+        "adaptive_rf_normalization_aware": {
+          "accuracy": 0.8125,
+          "balanced_accuracy": 0.8125,
+          "macro_f1": 0.7818181818181819,
+          "confusion": [
+            [4, 0, 0, 0],
+            [0, 4, 0, 0],
+            [0, 0, 4, 0],
+            [0, 0, 3, 1]
+          ],
+          "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+          "support": {
+            "qft": 4,
+            "grover": 4,
+            "qaoa": 4,
+            "graph_ghz": 4
+          }
+        }
+      },
+      "adaptive_rf_macro_f1_ci95": [0.5798282967032967, 1.0]
+    },
+    {
+      "budget": 0.1,
+      "attackers": {
+        "static_baseline_rf": {
+          "accuracy": 0.875,
+          "balanced_accuracy": 0.875,
+          "macro_f1": 0.8740079365079365,
+          "confusion": [
+            [3, 1, 0, 0],
+            [0, 4, 0, 0],
+            [1, 0, 3, 0],
+            [0, 0, 0, 4]
+          ],
+          "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+          "support": {
+            "qft": 4,
+            "grover": 4,
+            "qaoa": 4,
+            "graph_ghz": 4
+          }
+        },
+        "adaptive_rf": {
+          "accuracy": 0.875,
+          "balanced_accuracy": 0.875,
+          "macro_f1": 0.8740079365079365,
+          "confusion": [
+            [3, 0, 0, 1],
+            [0, 4, 0, 0],
+            [1, 0, 3, 0],
+            [0, 0, 0, 4]
+          ],
+          "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+          "support": {
+            "qft": 4,
+            "grover": 4,
+            "qaoa": 4,
+            "graph_ghz": 4
+          }
+        },
+        "adaptive_logreg": {
+          "accuracy": 0.875,
+          "balanced_accuracy": 0.875,
+          "macro_f1": 0.8740079365079365,
+          "confusion": [
+            [3, 1, 0, 0],
+            [0, 4, 0, 0],
+            [1, 0, 3, 0],
+            [0, 0, 0, 4]
+          ],
+          "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+          "support": {
+            "qft": 4,
+            "grover": 4,
+            "qaoa": 4,
+            "graph_ghz": 4
+          }
+        },
+        "adaptive_gboost": {
+          "accuracy": 0.8125,
+          "balanced_accuracy": 0.8125,
+          "macro_f1": 0.8055555555555555,
+          "confusion": [
+            [3, 0, 0, 1],
+            [0, 4, 0, 0],
+            [2, 0, 2, 0],
+            [0, 0, 0, 4]
+          ],
+          "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+          "support": {
+            "qft": 4,
+            "grover": 4,
+            "qaoa": 4,
+            "graph_ghz": 4
+          }
+        },
+        "adaptive_rf_normalization_aware": {
+          "accuracy": 0.75,
+          "balanced_accuracy": 0.75,
+          "macro_f1": 0.7183261183261184,
+          "confusion": [
+            [3, 1, 0, 0],
+            [0, 4, 0, 0],
+            [0, 0, 4, 0],
+            [0, 0, 3, 1]
+          ],
+          "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+          "support": {
+            "qft": 4,
+            "grover": 4,
+            "qaoa": 4,
+            "graph_ghz": 4
+          }
+        }
+      },
+      "adaptive_rf_macro_f1_ci95": [0.4803067439096851, 1.0]
+    },
+    {
+      "budget": 0.2,
+      "attackers": {
+        "static_baseline_rf": {
+          "accuracy": 0.9375,
+          "balanced_accuracy": 0.9375,
+          "macro_f1": 0.9365079365079365,
+          "confusion": [
+            [4, 0, 0, 0],
+            [0, 4, 0, 0],
+            [0, 1, 3, 0],
+            [0, 0, 0, 4]
+          ],
+          "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+          "support": {
+            "qft": 4,
+            "grover": 4,
+            "qaoa": 4,
+            "graph_ghz": 4
+          }
+        },
+        "adaptive_rf": {
+          "accuracy": 1.0,
+          "balanced_accuracy": 1.0,
+          "macro_f1": 1.0,
+          "confusion": [
+            [4, 0, 0, 0],
+            [0, 4, 0, 0],
+            [0, 0, 4, 0],
+            [0, 0, 0, 4]
+          ],
+          "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+          "support": {
+            "qft": 4,
+            "grover": 4,
+            "qaoa": 4,
+            "graph_ghz": 4
+          }
+        },
+        "adaptive_logreg": {
+          "accuracy": 0.8125,
+          "balanced_accuracy": 0.8125,
+          "macro_f1": 0.8160714285714286,
+          "confusion": [
+            [3, 1, 0, 0],
+            [0, 4, 0, 0],
+            [0, 1, 3, 0],
+            [1, 0, 0, 3]
+          ],
+          "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+          "support": {
+            "qft": 4,
+            "grover": 4,
+            "qaoa": 4,
+            "graph_ghz": 4
+          }
+        },
+        "adaptive_gboost": {
+          "accuracy": 0.8125,
+          "balanced_accuracy": 0.8125,
+          "macro_f1": 0.8127705627705628,
+          "confusion": [
+            [4, 0, 0, 0],
+            [0, 4, 0, 0],
+            [2, 0, 2, 0],
+            [1, 0, 0, 3]
+          ],
+          "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+          "support": {
+            "qft": 4,
+            "grover": 4,
+            "qaoa": 4,
+            "graph_ghz": 4
+          }
+        },
+        "adaptive_rf_normalization_aware": {
+          "accuracy": 0.875,
+          "balanced_accuracy": 0.875,
+          "macro_f1": 0.8785714285714287,
+          "confusion": [
+            [3, 0, 1, 0],
+            [0, 4, 0, 0],
+            [0, 0, 4, 0],
+            [0, 0, 1, 3]
+          ],
+          "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+          "support": {
+            "qft": 4,
+            "grover": 4,
+            "qaoa": 4,
+            "graph_ghz": 4
+          }
+        }
+      },
+      "adaptive_rf_macro_f1_ci95": [0.75, 1.0]
+    },
+    {
+      "budget": 0.5,
+      "attackers": {
+        "static_baseline_rf": {
+          "accuracy": 0.75,
+          "balanced_accuracy": 0.75,
+          "macro_f1": 0.7294372294372293,
+          "confusion": [
+            [3, 0, 1, 0],
+            [0, 4, 0, 0],
+            [0, 3, 1, 0],
+            [0, 0, 0, 4]
+          ],
+          "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+          "support": {
+            "qft": 4,
+            "grover": 4,
+            "qaoa": 4,
+            "graph_ghz": 4
+          }
+        },
+        "adaptive_rf": {
+          "accuracy": 0.625,
+          "balanced_accuracy": 0.625,
+          "macro_f1": 0.6261904761904762,
+          "confusion": [
+            [3, 0, 1, 0],
+            [0, 2, 2, 0],
+            [0, 1, 3, 0],
+            [2, 0, 0, 2]
+          ],
+          "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+          "support": {
+            "qft": 4,
+            "grover": 4,
+            "qaoa": 4,
+            "graph_ghz": 4
+          }
+        },
+        "adaptive_logreg": {
+          "accuracy": 0.6875,
+          "balanced_accuracy": 0.6875,
+          "macro_f1": 0.6791666666666667,
+          "confusion": [
+            [2, 1, 0, 1],
+            [0, 2, 2, 0],
+            [0, 0, 4, 0],
+            [0, 1, 0, 3]
+          ],
+          "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+          "support": {
+            "qft": 4,
+            "grover": 4,
+            "qaoa": 4,
+            "graph_ghz": 4
+          }
+        },
+        "adaptive_gboost": {
+          "accuracy": 0.4375,
+          "balanced_accuracy": 0.4375,
+          "macro_f1": 0.44146825396825395,
+          "confusion": [
+            [2, 0, 1, 1],
+            [0, 2, 2, 0],
+            [1, 2, 1, 0],
+            [2, 0, 0, 2]
+          ],
+          "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+          "support": {
+            "qft": 4,
+            "grover": 4,
+            "qaoa": 4,
+            "graph_ghz": 4
+          }
+        },
+        "adaptive_rf_normalization_aware": {
+          "accuracy": 0.875,
+          "balanced_accuracy": 0.875,
+          "macro_f1": 0.873015873015873,
+          "confusion": [
+            [3, 1, 0, 0],
+            [0, 4, 0, 0],
+            [0, 0, 4, 0],
+            [0, 0, 1, 3]
+          ],
+          "labels": ["qft", "grover", "qaoa", "graph_ghz"],
+          "support": {
+            "qft": 4,
+            "grover": 4,
+            "qaoa": 4,
+            "graph_ghz": 4
+          }
+        }
+      },
+      "adaptive_rf_macro_f1_ci95": [0.3382051282051282, 0.7833333333333333]
+    }
+  ],
+  "baseline_macro_f1_ci95": [0.5798282967032967, 1.0],
+  "metadata_confound_warning": true,
+  "sources": [
+    "artifacts/quick/predictions/baseline_predictions.csv",
+    "artifacts/quick/predictions/adaptive_predictions.csv",
+    "artifacts/quick/results/baseline.json",
+    "artifacts/quick/results/adaptive.json"
+  ]
+}

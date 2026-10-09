@@ -1,0 +1,98 @@
+{
+  "python": "3.12.3",
+  "packages": {
+    "qiskit": "2.5.2",
+    "qiskit-ibm-runtime": "0.50.0",
+    "scikit-learn": "1.8.0",
+    "numpy": "2.4.4",
+    "pandas": "3.0.2",
+    "networkx": "3.6.1",
+    "mqt.qcec": "3.10.2",
+    "pyyaml": "6.0.3"
+  },
+  "git_commit": null,
+  "profile": "quick",
+  "seeds": {
+    "dataset": 7,
+    "transpile": 11,
+    "attacker": 0
+  },
+  "backend": {
+    "name": "FakeNighthawk",
+    "num_qubits": 120,
+    "operations": [
+      "cz",
+      "delay",
+      "id",
+      "if_else",
+      "measure",
+      "reset",
+      "rz",
+      "sx",
+      "x"
+    ]
+  },
+  "feature_version": "v1",
+  "config": {
+    "dataset": {
+      "families": [
+        "qft",
+        "grover",
+        "qaoa",
+        "graph_ghz"
+      ],
+      "control_family": "random",
+      "widths": [
+        6,
+        8
+      ],
+      "bases_per_cell": 5,
+      "split": {
+        "train": 0.6,
+        "val": 0.2,
+        "test": 0.2
+      },
+      "seed": 7
+    },
+    "backend": {
+      "name": "FakeNighthawk",
+      "opt_levels": [
+        0,
+        2
+      ],
+      "transpile_seed": 11
+    },
+    "experiment": {
+      "attacker": {
+        "rf_trees": 300,
+        "seed": 0
+      },
+      "n_candidates": 6,
+      "strategies": [
+        "layout",
+        "decomp",
+        "reorder",
+        "decomp+reorder",
+        "decomp+layout",
+        "reorder+layout",
+        "decomp+reorder+layout"
+      ],
+      "repeats": 3,
+      "bootstrap": 300,
+      "gate_margin": 0.1,
+      "workers": 1
+    },
+    "budgets": {
+      "budgets": [
+        0.0,
+        0.1,
+        0.2,
+        0.5
+      ],
+      "verification": {
+        "operator_max_qubits": 10,
+        "qcec_timeout_s": 60
+      }
+    }
+  }
+}

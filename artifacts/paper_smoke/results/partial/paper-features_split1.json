@@ -1,0 +1,67 @@
+{
+  "split": 1,
+  "n_train": 188,
+  "n_test": 94,
+  "opt_transfer": {
+    "L0->L0": {
+      "accuracy": 0.8297872340425532,
+      "macro_f1": 0.8273191094619666,
+      "n": 47
+    },
+    "L0->L2": {
+      "accuracy": 0.1702127659574468,
+      "macro_f1": 0.12971552257266541,
+      "n": 47
+    },
+    "L2->L0": {
+      "accuracy": 0.19148936170212766,
+      "macro_f1": 0.13045112781954887,
+      "n": 47
+    },
+    "L2->L2": {
+      "accuracy": 0.8936170212765957,
+      "macro_f1": 0.8956071939265218,
+      "n": 47
+    }
+  },
+  "size_transfer": {},
+  "pooled": {
+    "accuracy": 0.8723404255319149,
+    "macro_f1": 0.873372037778322,
+    "n": 94
+  },
+  "best_params": {
+    "rf__max_depth": null,
+    "rf__min_samples_leaf": 1,
+    "rf__n_estimators": 50
+  },
+  "control_shuffled_labels": {
+    "accuracy": 0.11702127659574468,
+    "macro_f1": 0.12658008658008657,
+    "n": 94
+  },
+  "control_metadata_only": {
+    "accuracy": 0.8936170212765957,
+    "macro_f1": 0.8911154966734322,
+    "n": 94
+  },
+  "generator_disjoint": {
+    "pooled": {
+      "accuracy": 0.6666666666666666,
+      "macro_f1": 0.6708468863356082,
+      "n": 84
+    },
+    "by_opt": {
+      "L0": {
+        "accuracy": 0.6666666666666666,
+        "macro_f1": 0.6556776556776557,
+        "n": 42
+      },
+      "L2": {
+        "accuracy": 0.6666666666666666,
+        "macro_f1": 0.6509331005129324,
+        "n": 42
+      }
+    }
+  }
+}
