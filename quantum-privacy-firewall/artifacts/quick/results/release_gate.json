@@ -1,0 +1,8 @@
+{
+  "split_disjoint": true,
+  "all_selected_verified": true,
+  "surrogate_trained_on_train_only": true,
+  "baseline_numbers_trace_to_predictions": true,
+  "adaptive_numbers_trace_to_predictions": true,
+  "no_nan_features_in_selected": true
+}

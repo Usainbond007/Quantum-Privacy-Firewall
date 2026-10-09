@@ -1,0 +1,11 @@
+# Controlled circuit dataset (plan M1). "cell" = (family, width).
+families: [qft, grover, qaoa, graph_ghz]
+control_family: random        # kept as a separate control, never used as a class
+widths: [6, 8, 10]
+bases_per_cell: 10
+split: {train: 0.6, val: 0.2, test: 0.2}   # grouped by base_id
+seed: 7
+profiles:
+  smoke: {widths: [6], bases_per_cell: 5}
+  quick: {widths: [6, 8], bases_per_cell: 5}
+  full:  {widths: [6, 8, 10], bases_per_cell: 10}
