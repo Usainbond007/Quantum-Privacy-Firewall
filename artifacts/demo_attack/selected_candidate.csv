@@ -1,0 +1,2 @@
+strategy,seed,verify,verify_method,d_depth,d_2q,conf,pred,ok
+decomp+reorder,2,PASS (mqt_qcec),mqt_qcec,-0.0987261146496815,0.1438434982738781,0.51,fourier_like,True
