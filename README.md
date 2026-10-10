@@ -1,192 +1,517 @@
 # Quantum Privacy Firewall
 
-Experimental, Qiskit-based **pre-submission circuit privacy audit** (Q-Hack India 2026).
-It measures how well an observer who sees only the final backend-compiled circuit can guess the *algorithm family*, then tests
-semantics-preserving rewrites under overhead budgets. It is **not** encryption and **not** proven obfuscation.
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Qiskit](https://img.shields.io/badge/Qiskit-2.5.2-6929C4?logo=qiskit&logoColor=white)](https://www.ibm.com/quantum/qiskit)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=111111)](https://react.dev/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-ML-F7931E?logo=scikitlearn&logoColor=white)](https://scikit-learn.org/)
 
-Independent, IBM-inspired study. Inspiration: IBM Research, *Algorithmic Intent Leakage in Transpiled Quantum Circuits: An Initial Reverse-Engineering Study*
-(abstract only; no public code found). Families, features, defenses and code here are our own.
+**A privacy-aware compilation firewall for detecting and reducing algorithmic-intent leakage from transpiled quantum circuits.**
 
-## Problem overview
-A transpiler rewrites a program into the chip's native gates and wiring. That compiled circuit is what a cloud provider can observe, and its
-structure can hint at what the program is for. This repo (1) quantifies that leakage, (2) generates verified rewrites, (3) checks whether a
-**retrained** attacker still recovers the family, and (4) reports the privacy/overhead trade-off, including negative outcomes.
+Built for **Q-Hack India 2026: Quantum Security & Cryptography track**.
 
-## Architecture (data flow)
+Quantum Privacy Firewall (QPF) sits between a developer's logical quantum program and the circuit submitted to a quantum backend. It audits structural intent leakage, searches for functionally equivalent circuit representations with less revealing compiled fingerprints, verifies correctness, constrains hardware overhead, and tests the resulting protection against adaptive machine-learning attackers.
+
+> IBM Research showed that transpiled quantum circuits can retain enough structural information to reveal coarse algorithmic intent. QPF explores the defensive question: how can we reduce that leakage before the circuit leaves the developer's environment?
+
+---
+
+## The Problem
+
+Quantum programs do not execute on hardware in the high-level logical form in which they are designed.
+Before execution, a quantum circuit undergoes **backend-aware transpilation**: logical operations are decomposed into the processor's native gate set, logical qubits are mapped onto physical qubits, routing operations are introduced to satisfy the hardware **coupling topology**, and gate sequences are optimized for the target backend.
+
+This transformation creates an overlooked **privacy surface**. Although transpilation significantly rewrites the original program, the resulting physical circuit can retain measurable structural fingerprints of the underlying computation.
+
+Recent work by **Beat Buesser and Anil Kurmus, IBM Research** demonstrates that an observer with access only to the final backend-transpiled circuit can use normalized structural features to infer its **coarse algorithmic intent**, without access to the source program, logical-qubit layout, routing history, or intermediate compiler states.
+This creates a security problem for quantum cloud computing:
+
+> Protecting the source code does not necessarily protect the intent of the computation: the backend-visible circuit itself can become an information-leakage channel.
+
+Observable properties such as **gate composition, temporal two-qubit activity, physical-qubit load distribution, coupling-edge utilization, and interaction concentration** can form an algorithm-specific structural fingerprint. For proprietary quantum workloads, this may expose whether a private computation resembles search, optimization, Fourier-style processing, or entanglement generation.
+
+**QPF addresses the defensive problem:**
+
+> **Can we build a privacy-aware compilation layer that measures and reduces algorithmic-intent leakage from backend-transpiled quantum circuits, while preserving quantum semantics and bounding the additional hardware cost?**
+---
+
+## What QPF Does
+
+```mermaid
+flowchart LR
+    A[Logical circuit] --> B[Transpile + audit]
+    B --> C[Generate variants]
+    C --> D[Verify + budget]
+    D --> E[Select candidate]
+    E --> F[Adaptive report]
 ```
-logical circuit -> base_id (grouped 60/20/20 split) -> compile baseline (FakeNighthawk, opt levels) -> physical features
-   -> baseline attacker (RF + controls)            -> candidates: layout / decomp / reorder (+ combinations)
-   -> verify (Operator.equiv <=10 qubits, MQT QCEC above; UNKNOWN never PASS) -> compile each -> budget check (depth, 2Q gates, active qubits)
-   -> label-free selection by a frozen surrogate (trained on train split only) -> retrain attackers on protected train groups
-   -> evaluate once on the frozen protected test split -> report + release gate
-```
-Layout: `config/*.yaml`, `src/qpf/{circuits,compilation,features,verification,defenses,attacks,metrics,selection,pipeline,report}.py`,
-`scripts/{build_dataset,train_baseline,run_defense,evaluate_adaptive,reproduce_all}.py`, `tests/`, `notebooks/demo.ipynb`, `artifacts/<profile>/`.
 
-## Setup
+A protected candidate must:
+
+1. remain functionally equivalent to the original circuit;
+2. compile successfully for the target backend;
+3. produce an observable changed physical circuit;
+4. remain within configured execution-cost limits; and
+5. be evaluated against attackers that are allowed to learn the defense.
+
+---
+
+## Core Pipeline
+
+### 1. Generate Quantum Workloads
+
+QPF generates deterministic Qiskit circuits from four protected algorithm families. Each generator is pure in `(family, width, seed)`, so experiments can be reproduced exactly across dataset builds and defense runs.
+
+| Family | Representative workload |
+| --- | --- |
+| `qft` | Quantum Fourier Transform |
+| `grover` | Grover-style search / amplitude amplification |
+| `qaoa` | QAOA optimization circuits |
+| `graph_ghz` | Graph-state and GHZ entanglement |
+
+A separate `random` family is used as a control.
+
+Each circuit is reproducibly generated from:
+
+```text
+(family, width, seed)
+```
+
+Implementation: [`src/qpf/circuits.py`](src/qpf/circuits.py)
+
+---
+
+### 2. Hardware-Aware Transpilation
+
+Circuits are compiled with Qiskit against hardware-like IBM fake backend targets.
+
+The research pipeline primarily uses:
+
+```text
+FakeNighthawk
+```
+
+The interactive demo additionally supports:
+
+```text
+FakeSherbrooke
+FakeBrisbane
+```
+
+Transpilation exposes the classes of artifacts relevant to the threat model: native gate decomposition, physical-qubit mapping, routing, optimization-level behavior, coupling-map pressure, active-wire usage, and backend-edge activity.
+
+Implementation: [`src/qpf/compilation.py`](src/qpf/compilation.py)
+
+---
+
+### 3. Extract the Structural Fingerprint
+
+The attacker does not receive the original source program.
+
+It observes structural information derived from the **final physical circuit**.
+
+QPF extracts 13 normalized features spanning three leakage surfaces. The feature vector is intentionally compact and interpretable so that classification results can be traced back to concrete physical-circuit properties rather than opaque learned embeddings.
+
+**Gate composition**
+- two-qubit gate fraction
+- `rz`, `sx`, and `x` fractions
+
+**Temporal structure**
+- mean two-qubit activity per layer
+- two-qubit burstiness
+- early / middle / late two-qubit activity
+
+**Spatial hardware structure**
+- active physical-qubit fraction
+- qubit-load Gini coefficient
+- edge entropy
+- maximum hardware-edge load share
+
+The analyzer separately records depth, total operations, two-qubit gate count, and active physical qubits for controls, cost accounting, candidate rejection, and metadata-only baseline evaluation.
+
+Implementation: [`src/qpf/features.py`](src/qpf/features.py)
+
+---
+
+### 4. Attack the Circuit
+
+QPF deliberately attacks its own compiled workloads to quantify intent leakage under controlled, source-disjoint train/test splits.
+
+Implemented adversaries include:
+
+- **Random Forest** — primary attacker
+- **Logistic Regression**
+- **Gradient Boosting**
+- **Normalization-aware Random Forest** — stress attacker
+
+The primary classification task is:
+
+```mermaid
+flowchart LR
+    A[13 physical-circuit features] --> B[ML adversary] --> C[QFT / Grover / QAOA / Graph-GHZ]
+```
+
+The benchmark also includes shuffled-label and metadata-only controls, so the pipeline can distinguish real structural signal from trivial size/depth confounds.
+
+Implementation: [`src/qpf/attacks.py`](src/qpf/attacks.py)
+
+---
+
+## The Privacy Firewall
+
+Detecting leakage is only the first half of QPF.
+
+Once a circuit's physical representation has been analyzed, the firewall searches for alternative representations of the same computation. The goal is not simply to make the circuit larger or visually busier; every candidate must survive compilation, verification, and budget checks.
+
+### Equivalent Decomposition
+
+Quantum operations can often be represented through equivalent gate sequences.
+
+QPF rewrites selected operations into alternative decompositions, changing the observable gate-level representation while preserving circuit semantics. Implemented rules include alternatives for operations such as `cx`, `cz`, `h`, `x`, `rx`, `swap`, `cp`, and `rzz`.
+
+### Dependency-Preserving Reordering
+
+Independent operations can sometimes be reordered without changing the computation.
+
+QPF generates alternative schedules while preserving qubit dependencies rather than arbitrarily shuffling gates.
+
+### Layout Diversification
+
+Different valid logical-to-physical qubit mappings can change routing, edge usage, physical-qubit activity, and the resulting structural fingerprint.
+
+QPF searches connected physical layouts on the target backend, which can alter routing, qubit-load distribution, edge concentration, and active hardware footprint.
+
+Strategies can also be combined:
+
+```text
+decomp
+reorder
+layout
+decomp + reorder
+decomp + layout
+reorder + layout
+decomp + reorder + layout
+```
+
+Implementation: [`src/qpf/defenses.py`](src/qpf/defenses.py)
+
+---
+
+## Correctness Before Privacy
+
+A circuit that hides its intent but computes the wrong function is not a valid defense.
+
+Every candidate therefore passes through **quantum equivalence verification**.
+
+QPF uses:
+
+- Qiskit `Operator.equiv` where exact operator comparison is feasible;
+- MQT QCEC when configured for scalable circuit equivalence checking;
+- layout-aware compiled-circuit verification in the web workflow, including initial/final layouts and clean ancilla behavior for small active circuits.
+
+Verification has three states:
+
+```text
+PASS
+FAIL
+UNKNOWN
+```
+
+Only `PASS` candidates can be selected. `FAIL` and `UNKNOWN` candidates are retained as evidence with rejection reasons, but they cannot become the selected protected circuit.
+
+Implementation: [`src/qpf/verification.py`](src/qpf/verification.py)
+
+---
+
+## Privacy Has a Cost
+
+Adding arbitrary operations could obscure structure while making the circuit unusable.
+
+QPF therefore constrains candidate circuits using explicit hardware-cost budgets:
+
+- relative circuit-depth overhead;
+- relative two-qubit gate overhead;
+- relative active-physical-qubit overhead.
+
+Conceptually, the firewall searches for:
+
+\[
+\min_{C'} \; Leakage(C')
+\]
+
+subject to
+
+\[
+C' \equiv C
+\]
+
+and
+
+\[
+Cost(C') \leq Budget
+\]
+
+where \(C\) is the original circuit and \(C'\) is a candidate protected representation.
+
+Candidates that fail verification, fail compilation, exceed the configured budget, or compile back to an unchanged physical circuit are rejected.
+
+Implementation: [`src/qpf/selection.py`](src/qpf/selection.py)
+
+---
+
+## Adaptive Attacker Evaluation
+
+A defense should not be considered successful merely because it confuses a classifier trained only on undefended circuits.
+
+QPF assumes a stronger adversary:
+
+> **The attacker knows that the defense exists and can train on protected circuits.**
+
+For every evaluated resource budget:
+
+```mermaid
+flowchart LR
+    A[Protected train] --> B[Retrain attacker] --> C[Protected test] --> D[Macro-F1 / accuracy]
+```
+
+This distinguishes genuine robustness from simple distribution shift.
+
+QPF evaluates adaptive Random Forest, Logistic Regression, Gradient Boosting, and normalization-aware attacks. This gives a stronger read than a static before/after confidence drop because the protected distribution is part of the adversary's training data.
+
+---
+
+## Experimental Validity
+
+The pipeline includes several controls intended to prevent misleading security results.
+
+### Source-Disjoint Splitting
+
+All compiled variants originating from the same logical circuit share a `base_id`.
+
+Train, validation, and test partitions are grouped by this identifier, preventing different transpiled versions of the same logical circuit from leaking across the train/test boundary.
+
+### Label-Free Defense Selection
+
+Held-out true labels are never used to choose protected candidates.
+
+### Adaptive Evaluation
+
+Attackers are retrained on protected training circuits before being evaluated on protected held-out circuits.
+
+### Traceable Results
+
+Reported benchmark metrics are backed by saved prediction files, manifests, experiment configuration, and frozen test identifiers.
+
+---
+
+## Results
+
+The committed **quick-profile benchmark** provides a reproducible proof of concept.
+
+### Baseline Intent Leakage
+
+| Evaluation | Macro-F1 |
+| --- | ---: |
+| Full-feature Random Forest | **0.937** |
+| Shuffled-label control | 0.409 |
+| Metadata-only control | 0.874 |
+| Random chance | 0.250 |
+
+The experiment demonstrates that algorithm family is learnable in the controlled benchmark.
+
+It also exposes an important limitation: the metadata-only classifier reaches **0.874 macro-F1**, indicating that circuit complexity metadata remains a significant confound.
+
+QPF reports this explicitly rather than attributing all classification performance to deeper structural leakage. This is important because a privacy firewall should reveal when a dataset or benchmark still leaks through simple resource metadata.
+
+### Adaptive Defense Evaluation
+
+| Budget | Adaptive RF | Logistic Regression | Gradient Boosting | Normalization-Aware |
+| ---: | ---: | ---: | ---: | ---: |
+| 0% | 0.937 | 0.817 | 0.937 | 0.782 |
+| 10% | 0.874 | 0.874 | 0.806 | 0.718 |
+| 20% | 1.000 | 0.816 | 0.813 | 0.879 |
+| 50% | **0.626** | 0.679 | **0.441** | 0.873 |
+
+The results are intentionally not presented as proof of universal privacy.
+
+They show that:
+
+- measurable intent leakage exists in the controlled benchmark;
+- equivalent circuit transformations can change attacker performance;
+- privacy improvement is **attacker- and budget-dependent**;
+- an adaptive or normalization-aware attacker can recover information that defeats weaker evaluations;
+- meaningful circuit privacy therefore requires adversarial evaluation, not merely visually different circuits.
+
+The current contribution is a **working, reproducible framework for measuring and reducing leakage under explicit correctness and execution-cost constraints**.
+
+Saved evidence:
+
+```mermaid
+flowchart LR
+    A[artifacts/quick] --> B[manifests / features / models / predictions / results / figures]
+```
+
+---
+
+## Interactive Circuit Lab
+
+QPF includes a React + FastAPI web application for running the firewall on individual circuits.
+
+A user can configure:
+
+- algorithm family;
+- circuit width and seed;
+- target backend;
+- transpiler optimization level and seed;
+- number of candidate variants;
+- transformation strategies;
+- execution-overhead budget.
+
+The application then displays:
+
+- logical input circuit;
+- baseline transpiled circuit;
+- selected protected candidate;
+- verification evidence;
+- candidate rejection reasons;
+- structural metrics;
+- depth and two-qubit overhead;
+- attacker prediction;
+- saved benchmark results;
+- archived benchmark metrics from the saved quick-profile experiment;
+- OpenQASM 3 and JSON evidence exports.
+
+```mermaid
+flowchart LR
+    A[React UI] --> B[FastAPI] --> C[QPF engine]
+    C --> D[Qiskit + fake backends]
+    C --> E[Verification evidence]
+    C --> F[Attacker metrics]
+```
+
+---
+
+## Repository Structure
+
+```mermaid
+flowchart LR
+    A[config] --> B[src/qpf core]
+    B --> C[scripts]
+    B --> D[backend API]
+    D --> E[frontend UI]
+    B --> F[artifacts + tests]
+```
+
+---
+
+## Quick Start
+
+### Requirements
+
+- Python 3.10+
+- Node.js 22.12+
+- Git
+
+### Install
+
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt && pip install -e .
-pytest -q                                   # 31 tests: splits, features, equivalence (incl. wrong circuits must FAIL), budgets, reproducibility
+git clone https://github.com/Usainbond007/qpf.git
+cd qpf
+
+python3 -m venv .venv
+source .venv/bin/activate
+
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m pip install -e .
 ```
 
-## Run
+### Run the Research Pipeline
+
+Smoke test:
+
 ```bash
-cd scripts
-python reproduce_all.py --profile smoke     # ~30 s on 1 core   (tiny; for a pipeline check only)
-python reproduce_all.py --profile quick     # ~2.5 min on 1 core (what the notebook and results below use)
-python reproduce_all.py --profile full      # larger dataset (widths 6/8/10, 10 bases/cell, 4 opt levels); NOT completed in our 1-core sandbox, use --workers N
-```
-Step by step: `build_dataset.py` -> `train_baseline.py` -> `run_defense.py` -> `evaluate_adaptive.py` (each takes `--profile`, `--workers`).
-`reproduce_all.py` exits non-zero if the release gate fails.
-
-## Demo
-`jupyter lab notebooks/demo.ipynb` (loads saved artifacts; set `RERUN = True` to recompute live). Terminal demo: `python scripts/reproduce_all.py --profile quick`.
-
-### Interactive circuit lab
-
-The web demo runs a **single selected circuit**, independently of `src/qpf/pipeline.py`.
-It uses React, TypeScript, Vite and Tailwind with FastAPI and one bounded background worker.
-The UI offers an SVG circuit viewer with zoom, gate parameter inspection, physical layout mappings,
-baseline/selected comparisons, budget metrics, per-candidate verification evidence and downloads.
-
-From the repository root, install Python dependencies and start the API:
-
-```powershell
-python -m venv .venv
-.venv\Scripts\python -m pip install -r backend/requirements.txt
-.venv\Scripts\python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
+python scripts/reproduce_all.py --profile smoke
 ```
 
-In a second terminal (Node.js 22.12+):
+Reproduce the committed quick-profile experiment:
 
-```powershell
+```bash
+python scripts/reproduce_all.py --profile quick
+```
+
+### Run the Web Application
+
+Backend:
+
+```bash
+python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
+```
+
+Frontend:
+
+```bash
 cd frontend
 npm ci
 npm run dev
 ```
 
-Open **http://localhost:5173**. Vite proxies `/api` to port 8000. For a single-server demo,
-run `npm run build` inside `frontend`, then start or restart FastAPI and open
-**http://127.0.0.1:8000**. The backend serves the generated `frontend/dist` bundle.
-API documentation is at **http://127.0.0.1:8000/docs**.
-On macOS/Linux, use `.venv/bin/python` in place of `.venv\Scripts\python`.
-If Windows reserves port 8000, run the single-server demo with `--port 8765` and open
-**http://127.0.0.1:8765** instead. Development mode requires updating the Vite proxy to the same API port.
-`backend/requirements-lock.txt` records the validated Python 3.14 / Windows environment;
-`frontend/package-lock.json` locks the frontend dependencies for `npm ci`.
+Open:
 
-The main integration is `backend/app/services/demo.py`:
-
-1. Generate the requested logical circuit; compile and verify its baseline.
-2. Generate seeded transformations using the existing defense functions.
-3. Require logical equivalence `PASS` before compiling a candidate.
-4. Verify each compiled circuit against the original logical computation, accounting for initial/final layouts and clean ancillas.
-5. Calculate the existing physical metrics/features and enforce the existing budget rules for depth, two-qubit count and active wires.
-6. Select a changed candidate with both checks `PASS`; retain every alternative and rejection reason.
-
-The exact compiled check compares **all logical basis inputs** up to global phase. It compacts idle
-hardware wires and checks the full clean-ancilla isometry on at most **10 active physical wires**.
-Unsupported operations, missing layouts and larger active circuits return **UNKNOWN**; they never qualify
-as verified candidates. A non-PASS baseline check fails the run with checker details.
-The demo accepts widths **4–8** (the QAOA generator requires at least four for even widths),
-**1–24 candidates**, optimization levels **0–3**, budgets **0–100%**, and allowlisted fake IBM backends.
-Layout transformations use the user-selected backend.
-
-If no changed candidate qualifies, the outcome is `NO_CHANGED_CANDIDATE`, with the explicit message
-**“No changed candidate within budget”**, no selected candidate, and a verified baseline QASM export.
-Changes are detected from compiled gates and physical wiring/layout; a global-phase-only difference
-does not qualify. Candidate orderings that survive compilation count as observable changes.
-
-By default selection maximizes the mean absolute distance across the existing 13 structural features,
-then prefers lower maximum overhead and stable candidate ID. This is a descriptive score, **not a privacy estimate**.
-To use a compatible frozen classifier, set `QPF_SURROGATE_PATH` to a **trusted local** joblib model trained
-with `qpf.features.FEATURE_NAMES` in that order; selection then minimizes maximum family confidence.
-No model is trained during a run, and family labels are never used for ranking. Single-circuit confidence
-does not replace the research pipeline's adaptive attacker evaluation.
-
-The **Attacker accuracy & leakage** panel is available before a demo run. Its baseline/protected
-accuracy, balanced accuracy, macro-F1, per-family recall, confusion matrices, controls and saved
-95% macro-F1 intervals come from the existing quick-profile frozen test dataset (8 distinct
-circuits, 16 compiled rows). Select a research budget and attacker to inspect the measured
-trade-off. Metrics are recomputed from the saved prediction CSVs and checked against their
-summary JSON; missing or inconsistent artifacts show an explicit unavailable state.
-These are archived dataset results, not accuracy measured from the current single circuit.
-
-For each new run, the bundled frozen `artifacts/quick/models/baseline_rf.joblib` also predicts
-the family of baseline and candidate circuits. The UI shows the predicted family, confidence,
-full probability distribution and correct/incorrect result. These inference results do not
-change the default structural selection method. `QPF_SURROGATE_PATH` overrides this attacker
-as well as enabling confidence-based selection. Training context is shown explicitly; the
-bundled model was trained on FakeNighthawk, widths 6/8 and optimization levels 0/2. The random
-control is outside its family classes, so correctness is not scored. Confidence is not accuracy.
-Every metrics export includes its benchmark snapshot and per-circuit attacker predictions.
-
-| Endpoint | Behavior |
-| --- | --- |
-| `GET /api/options` | Available families, backends, strategies and limits |
-| `GET /api/benchmarks` | Saved frozen-test accuracy, balanced accuracy, macro-F1, confusion matrices, controls and budget comparisons |
-| `POST /api/circuits/preview` | Logical circuit JSON |
-| `POST /api/runs` | HTTP 202 with a run ID; HTTP 429 when the queue is full |
-| `GET /api/runs/{id}` | Queued/running/completed/failed state, progress, results and errors |
-| `GET /api/runs/{id}/exports/qasm` | Selected transpiled OpenQASM 3 (baseline fallback when none qualifies) |
-| `GET /api/runs/{id}/exports/metrics` | Request, circuits, metrics, all candidates and verification evidence as JSON |
-
-Example run request:
-
-```json
-{
-  "family": "graph_ghz", "width": 4, "seed": 21,
-  "backend": "FakeNighthawk", "optimization_level": 2, "transpile_seed": 11,
-  "candidates": 6, "budget": 0.2,
-  "strategies": ["layout", "decomp+layout", "decomp+reorder"]
-}
+```text
+http://localhost:5173
 ```
 
-Circuit JSON contains `num_qubits`, `logical_width`, visible physical `qubits`, `gates`
-(name, wire indices, parameters, classical bits and layer), `global_phase`, `depth`, `size`,
-and initial/final logical-to-physical `layout` mappings. Idle hardware wires are omitted from
-the displayed wire list while their original indices remain intact.
+---
 
-Run files are saved in gitignored `runtime/<uuid>/`. One running job plus three queued jobs are
-admitted; the oldest terminal runs are evicted when the retained run count reaches 50.
-Snapshots and completed exports survive restart; interrupted jobs become failed with a restart explanation.
-Use **one Uvicorn process**; do not use multiple `--workers` with this local job store.
-`QPF_RUNTIME_DIR` overrides storage, and `QPF_CORS_ORIGINS` sets comma-separated frontend origins.
-This is a local demo, without authentication or a distributed job queue.
+## Testing
 
-Validation:
+Run the Python test suite:
 
-```powershell
-.venv\Scripts\python -m pytest -q
+```bash
+pytest -q
+```
+
+Run frontend tests:
+
+```bash
 cd frontend
 npm test
+```
+
+Build the frontend:
+
+```bash
 npm run build
 ```
 
-## Measured results (profile `quick`, 1 run; generated by `scripts/make_results_md.py`, not hand-typed)
-```
-BASELINE (frozen test split, K=4 classes, chance=0.25)
-  full-feature RF macro-F1 = 0.937  CI95 0.580-1.000
-  shuffled-label control  = 0.409   metadata-only control = 0.874
-  exit gate passed = True   metadata confound warning = True
-PROTECTED (adaptive attackers retrained on protected training groups; frozen test split)
-  budget | adaptive RF | logreg | gboost | norm-aware | d.depth | d.2Q | protected%
-      0% |       0.937 |  0.817 |  0.937 |      0.782 |     -2.0% |  -4.0% |     24%
-     10% |       0.874 |  0.874 |  0.806 |      0.718 |     -1.8% |  -3.3% |     61%
-     20% |       1.000 |  0.816 |  0.813 |      0.879 |     -1.1% |  -3.9% |     70%
-     50% |       0.626 |  0.679 |  0.441 |      0.873 |      3.7% |  -1.4% |     86%
-```
-Reading (all from the artifacts): the baseline classifier beats the shuffled-label control, but the **metadata-only control is nearly as good**
-(confound warning = True), so a large part of the measured "leakage" in this small dataset may be circuit size/complexity rather than algorithmic structure.
-Test sets are small (4 circuits per class), confidence intervals are wide, and the protected results are mixed: no budget shows a clear, robust drop across
-all retrained attackers (the normalization-aware attacker recovers at 50%). **We therefore do not claim privacy protection.** If this holds at larger scale,
-the deliverable is the *Quantum Circuit Leakage Auditor* (baseline audit) from the plan's fallback. `reorder` rewrites never survive compilation (survival 0.00 in `defense.json`).
+Tests cover split disjointness, deterministic feature extraction, equivalence verification, invalid-circuit rejection, budget boundaries, label-free candidate selection, API behavior, compiled-circuit verification, benchmark traceability, and frontend interactions.
 
-## Validity rules enforced in code
-Grouped splits by `base_id`; selection never reads labels (surrogate trained on train split only, checked by the release gate); attackers are retrained on
-protected data; controls (chance, shuffled labels, metadata-only); all selected circuits verified PASS; every reported number is recomputed from saved predictions
-(`release_gate.json`). FakeNighthawk is a fake-backend snapshot, not live hardware. Operator/QCEC equivalence is checked on the *logical* circuit; compilation is trusted Qiskit.
+---
 
-## Limitations
-Small controlled dataset; our own 4 families and 13 features (the IBM poster's exact definitions are not public); no hardware runs; no formal privacy guarantee.
+## Research Basis
+
+QPF was motivated by:
+
+**Beat Buesser and Anil Kurmus, IBM Research**  
+*Algorithmic Intent Leakage in Transpiled Quantum Circuits: An Initial Reverse-Engineering Study*, IEEE Quantum Week 2026.
+
+Their work demonstrates that final backend-transpiled quantum circuits can leak coarse algorithmic intent through observable structural features. 
+
+Our work builds a privacy-aware compilation firewall that detects this leakage and evaluates verified, functionally equivalent circuit transformations to reduce intent recoverability under adaptive attacks.
+
+This repository is an **independent implementation**, not IBM Research source code or an official IBM project.
+
+---
+
+## Scope and Current Limitations
+
+QPF is a research prototype for empirical quantum-circuit privacy evaluation.
+Current research directions include:
+
+- reducing metadata confounds through better-balanced workloads;
+- feature-importance and leakage-channel ablation studies;
+- cross-backend generalization;
+- stronger adaptive and canonicalization-aware attackers;
+- compiler-resistant circuit transformations;
+- noisy-simulator and hardware evaluation.
