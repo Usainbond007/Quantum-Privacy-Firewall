@@ -22,6 +22,27 @@ CLASSES = {
     "arithmetic_permutation": ["ripple_adder", "incrementer", "permutation_swaps", "controlled_swap_network", "comparator", "majority_logic", "toffoli"],
 }
 CLASS_LABELS = list(CLASSES)
+
+# Verification tier of each generator, backed by tests/test_generator_audit.py:
+#   semantic   - mathematical invariant checked (statevector / truth table / stabilizers / analytic result)
+#   structural - gate content and qubit topology checked against the named construction; dynamics NOT checked
+#   analogue   - only unitarity/width/determinism tested; the circuit is a structural stand-in for its name
+AUDIT = {
+ "ghz": "semantic", "bell_chain": "structural", "graph_line": "semantic", "graph_ring": "semantic", "graph_star": "semantic",
+ "w_state_ladder": "semantic", "cluster_grid": "semantic",
+ "qft_swaps": "semantic", "qft_no_swaps": "semantic", "iqft_swaps": "semantic", "iqft_no_swaps": "semantic",
+ "approx_qft": "analogue", "phase_estimation": "semantic", "qft_phase_gradient": "analogue",
+ "parity": "semantic", "parity_odd": "semantic", "parity_even": "semantic", "phase_oracle": "structural",
+ "phase_ladder": "structural", "controlled_phase_ladder": "structural", "diagonal_phase_pattern": "structural",
+ "grover": "semantic", "grover_zero": "semantic", "grover_two_iterations": "semantic", "parity_amplitude_amplification": "semantic",
+ "fixed_point_amplitude_amplification": "structural", "amplitude_estimation_style": "analogue",
+ "hea_linear": "structural", "hea_ring": "structural", "hea_brickwork": "structural", "real_amplitudes": "structural",
+ "twolocal_rx_rz": "structural", "qaoa_line": "structural", "qaoa_ring": "structural",
+ "trotter_zz_xx": "structural", "trotter_zz_xx_ring": "structural", "trotter_tfim": "structural", "trotter_xxz": "structural",
+ "trotter_heisenberg": "structural", "trotter_longitudinal_ising": "structural",
+ "ripple_adder": "semantic", "incrementer": "semantic", "permutation_swaps": "semantic", "controlled_swap_network": "structural",
+ "comparator": "semantic", "majority_logic": "semantic", "toffoli": "semantic",
+}
 GENERATORS = {g: c for c, gs in CLASSES.items() for g in gs}
 assert len(GENERATORS) == 47 and sum(len(v) for v in CLASSES.values()) == 47
 
@@ -152,13 +173,16 @@ def diagonal_phase_pattern(n, r):
 # ------------------------------------------------------------------ amplitude amplification
 def _search_regs(n): m = n // 2; return list(range(m)), list(range(m, n))     # search register, ancillas
 
+def _parity_phase_oracle(qc, S, anc):
+    """Phase (-1)^{parity(x)} on register S via phase kickback from a clean ancilla (prepared in |-> and restored)."""
+    qc.x(anc); qc.h(anc)
+    for q in S: qc.cx(q, anc)
+    qc.h(anc); qc.x(anc)
+
 def _grover(n, r, marked, iters, parity_oracle=False, fixed_point=False):
     S, A = _search_regs(n); m = len(S); qc = QuantumCircuit(n); qc.h(S)
     for it in range(iters):
-        if parity_oracle:                              # oracle = parity phase on the search register
-            qc.h(A[0]); qc.x(A[0])
-            for q in S: qc.cx(q, A[0])
-            qc.x(A[0]); qc.h(A[0])
+        if parity_oracle: _parity_phase_oracle(qc, S, A[0])
         else:
             for q, b in zip(S, marked):
                 if b == 0: qc.x(q)

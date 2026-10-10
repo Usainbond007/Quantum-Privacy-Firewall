@@ -16,7 +16,25 @@ def _table(title, ours, ref, rows, cols, prefix_fmt):
         L.append(f"| {a} | " + " | ".join(cells) + " |")
     return L
 
+def _rows(cfg, res, ref):
+    S = res["summary"]; rows = []
+    for kind, key, refkey in (("optimization_level", "opt_transfer", "opt_transfer_acc_f1"), ("circuit_size", "size_transfer", "size_transfer_acc_f1")):
+        for cell, v in S[key].items():
+            r = ref[refkey].get(cell)
+            for i, m in enumerate(("accuracy", "macro_f1")):
+                rows.append(dict(matrix=kind, train_test=cell, metric=m, ours_mean=v[m]["mean"], ours_std=v[m]["std"], n_splits=v[m]["n_splits"],
+                                 paper_reported=(r[i] if r else None), difference=(v[m]["mean"] - r[i] if r else None)))
+    return rows
+
+def write_exports(cfg, res):
+    import csv
+    ref = json.load(open(ROOT / "config" / "paper_reference.json")); rows = _rows(cfg, res, ref); d = out_dir(cfg, "results")
+    with open(d / "paper_comparison.csv", "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
+    json.dump({"note": ref["_note"], "profile": cfg["profile"], "rows": rows, "summary": res["summary"]}, open(d / "paper_comparison.json", "w"), indent=2)
+
 def write_report(cfg, res, path=None):
+    write_exports(cfg, res)
     ref = json.load(open(ROOT / "config" / "paper_reference.json")); S = res["summary"]
     Lv = [f"L{o}" for o in cfg["opt_levels"]]; L = ["# Paper-aligned benchmark: measured vs reported", "",
         "Independent implementation. Generators, feature conventions and dataset size are our interpretation; the paper does not publish them. "
@@ -32,4 +50,8 @@ def write_report(cfg, res, path=None):
         L.append(f"| {lab} | {_cell(S[name]['accuracy'])} | {_cell(S[name]['macro_f1'])} |")
     if "sensitivity_gini_used" in res:
         u = res["sensitivity_gini_used"]; L.append(f"| Gini over used edges/qubits only (convention sensitivity) | {_cell(u['pooled']['accuracy'])} | {_cell(u['pooled']['macro_f1'])} |")
+    L += ["", "### Per-class results, pooled source-disjoint test (mean±std over splits)", "", "| intent class | precision | recall | F1 |", "|---|---|---|---|"]
+    for c, v in S["pooled_per_class"].items(): L.append(f"| {c} | {_cell(v['precision'])} | {_cell(v['recall'])} | {_cell(v['f1'])} |")
+    L += ["", "Confusion matrix (sum over splits; rows = true class, columns = predicted):", "", "```"]
+    L += [" ".join(f"{x:5d}" for x in row) for row in S["pooled_confusion_sum"]] + ["```"]
     p = pathlib.Path(path) if path else out_dir(cfg, "results") / "paper_comparison.md"; p.write_text("\n".join(L) + "\n"); return p

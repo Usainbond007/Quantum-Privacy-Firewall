@@ -6,29 +6,574 @@
     "L0->L0": {
       "accuracy": 0.851063829787234,
       "macro_f1": 0.8515865087293658,
-      "n": 47
+      "n": 47,
+      "confusion": [
+        [
+          6,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          7,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          6,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          5,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          1,
+          0,
+          0,
+          6,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          0,
+          5,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0,
+          5
+        ]
+      ],
+      "per_class": {
+        "entanglement_generation": {
+          "precision": 0.75,
+          "recall": 0.8571428571428571,
+          "f1": 0.7999999999999999,
+          "support": 7
+        },
+        "fourier_like": {
+          "precision": 0.875,
+          "recall": 1.0,
+          "f1": 0.9333333333333333,
+          "support": 7
+        },
+        "phase_oracle_like": {
+          "precision": 0.8571428571428571,
+          "recall": 0.8571428571428571,
+          "f1": 0.8571428571428571,
+          "support": 7
+        },
+        "amplitude_amplification": {
+          "precision": 0.7142857142857143,
+          "recall": 0.8333333333333334,
+          "f1": 0.7692307692307692,
+          "support": 6
+        },
+        "variational_ansatz": {
+          "precision": 1.0,
+          "recall": 0.8571428571428571,
+          "f1": 0.923076923076923,
+          "support": 7
+        },
+        "hamiltonian_simulation": {
+          "precision": 1.0,
+          "recall": 0.8333333333333334,
+          "f1": 0.9090909090909091,
+          "support": 6
+        },
+        "arithmetic_permutation": {
+          "precision": 0.8333333333333334,
+          "recall": 0.7142857142857143,
+          "f1": 0.7692307692307692,
+          "support": 7
+        }
+      }
     },
     "L0->L2": {
       "accuracy": 0.2978723404255319,
       "macro_f1": 0.24444444444444444,
-      "n": 47
+      "n": 47,
+      "confusion": [
+        [
+          7,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          2,
+          0,
+          4,
+          0,
+          1
+        ],
+        [
+          2,
+          0,
+          3,
+          2,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          4
+        ],
+        [
+          6,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          3,
+          0,
+          0,
+          0,
+          1,
+          2,
+          0
+        ],
+        [
+          1,
+          0,
+          1,
+          5,
+          0,
+          0,
+          0
+        ]
+      ],
+      "per_class": {
+        "entanglement_generation": {
+          "precision": 0.3684210526315789,
+          "recall": 1.0,
+          "f1": 0.5384615384615384,
+          "support": 7
+        },
+        "fourier_like": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 7
+        },
+        "phase_oracle_like": {
+          "precision": 0.5,
+          "recall": 0.42857142857142855,
+          "f1": 0.4615384615384615,
+          "support": 7
+        },
+        "amplitude_amplification": {
+          "precision": 0.2222222222222222,
+          "recall": 0.3333333333333333,
+          "f1": 0.26666666666666666,
+          "support": 6
+        },
+        "variational_ansatz": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 7
+        },
+        "hamiltonian_simulation": {
+          "precision": 0.6666666666666666,
+          "recall": 0.3333333333333333,
+          "f1": 0.4444444444444444,
+          "support": 6
+        },
+        "arithmetic_permutation": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 7
+        }
+      }
     },
     "L2->L0": {
       "accuracy": 0.2553191489361702,
       "macro_f1": 0.20759954331382907,
-      "n": 47
+      "n": 47,
+      "confusion": [
+        [
+          1,
+          0,
+          4,
+          0,
+          0,
+          0,
+          2
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          7
+        ],
+        [
+          0,
+          1,
+          3,
+          0,
+          0,
+          0,
+          3
+        ],
+        [
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          4
+        ],
+        [
+          1,
+          2,
+          0,
+          0,
+          0,
+          1,
+          3
+        ],
+        [
+          3,
+          0,
+          0,
+          0,
+          1,
+          1,
+          1
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          6
+        ]
+      ],
+      "per_class": {
+        "entanglement_generation": {
+          "precision": 0.16666666666666666,
+          "recall": 0.14285714285714285,
+          "f1": 0.15384615384615383,
+          "support": 7
+        },
+        "fourier_like": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 7
+        },
+        "phase_oracle_like": {
+          "precision": 0.375,
+          "recall": 0.42857142857142855,
+          "f1": 0.39999999999999997,
+          "support": 7
+        },
+        "amplitude_amplification": {
+          "precision": 1.0,
+          "recall": 0.16666666666666666,
+          "f1": 0.2857142857142857,
+          "support": 6
+        },
+        "variational_ansatz": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 7
+        },
+        "hamiltonian_simulation": {
+          "precision": 0.5,
+          "recall": 0.16666666666666666,
+          "f1": 0.25,
+          "support": 6
+        },
+        "arithmetic_permutation": {
+          "precision": 0.23076923076923078,
+          "recall": 0.8571428571428571,
+          "f1": 0.36363636363636365,
+          "support": 7
+        }
+      }
     },
     "L2->L2": {
       "accuracy": 0.9148936170212766,
       "macro_f1": 0.9127586699015271,
-      "n": 47
+      "n": 47,
+      "confusion": [
+        [
+          6,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          7,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          7,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          5,
+          0,
+          0,
+          1
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          6,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          5,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          7
+        ]
+      ],
+      "per_class": {
+        "entanglement_generation": {
+          "precision": 1.0,
+          "recall": 0.8571428571428571,
+          "f1": 0.923076923076923,
+          "support": 7
+        },
+        "fourier_like": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 7
+        },
+        "phase_oracle_like": {
+          "precision": 0.875,
+          "recall": 1.0,
+          "f1": 0.9333333333333333,
+          "support": 7
+        },
+        "amplitude_amplification": {
+          "precision": 1.0,
+          "recall": 0.8333333333333334,
+          "f1": 0.9090909090909091,
+          "support": 6
+        },
+        "variational_ansatz": {
+          "precision": 0.8571428571428571,
+          "recall": 0.8571428571428571,
+          "f1": 0.8571428571428571,
+          "support": 7
+        },
+        "hamiltonian_simulation": {
+          "precision": 0.8333333333333334,
+          "recall": 0.8333333333333334,
+          "f1": 0.8333333333333334,
+          "support": 6
+        },
+        "arithmetic_permutation": {
+          "precision": 0.875,
+          "recall": 1.0,
+          "f1": 0.9333333333333333,
+          "support": 7
+        }
+      }
     }
   },
   "size_transfer": {},
   "pooled": {
     "accuracy": 0.8723404255319149,
     "macro_f1": 0.8724696808567776,
-    "n": 94
+    "n": 94,
+    "confusion": [
+      [
+        13,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        14,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        0,
+        11,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        10,
+        0,
+        0,
+        2
+      ],
+      [
+        0,
+        1,
+        1,
+        0,
+        10,
+        2,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        0,
+        11,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        13
+      ]
+    ],
+    "per_class": {
+      "entanglement_generation": {
+        "precision": 0.7647058823529411,
+        "recall": 0.9285714285714286,
+        "f1": 0.8387096774193549,
+        "support": 14
+      },
+      "fourier_like": {
+        "precision": 0.875,
+        "recall": 1.0,
+        "f1": 0.9333333333333333,
+        "support": 14
+      },
+      "phase_oracle_like": {
+        "precision": 0.9166666666666666,
+        "recall": 0.7857142857142857,
+        "f1": 0.8461538461538461,
+        "support": 14
+      },
+      "amplitude_amplification": {
+        "precision": 1.0,
+        "recall": 0.8333333333333334,
+        "f1": 0.9090909090909091,
+        "support": 12
+      },
+      "variational_ansatz": {
+        "precision": 1.0,
+        "recall": 0.7142857142857143,
+        "f1": 0.8333333333333333,
+        "support": 14
+      },
+      "hamiltonian_simulation": {
+        "precision": 0.8461538461538461,
+        "recall": 0.9166666666666666,
+        "f1": 0.8799999999999999,
+        "support": 12
+      },
+      "arithmetic_permutation": {
+        "precision": 0.8125,
+        "recall": 0.9285714285714286,
+        "f1": 0.8666666666666666,
+        "support": 14
+      }
+    }
   },
   "best_params": {
     "rf__max_depth": null,
@@ -38,29 +583,574 @@
   "control_shuffled_labels": {
     "accuracy": 0.11702127659574468,
     "macro_f1": 0.12182336182336183,
-    "n": 94
+    "n": 94,
+    "confusion": [
+      [
+        0,
+        1,
+        2,
+        3,
+        3,
+        3,
+        2
+      ],
+      [
+        5,
+        0,
+        3,
+        5,
+        0,
+        0,
+        1
+      ],
+      [
+        3,
+        3,
+        2,
+        2,
+        2,
+        0,
+        2
+      ],
+      [
+        2,
+        5,
+        1,
+        0,
+        2,
+        2,
+        0
+      ],
+      [
+        4,
+        0,
+        1,
+        1,
+        2,
+        5,
+        1
+      ],
+      [
+        3,
+        0,
+        1,
+        3,
+        2,
+        2,
+        1
+      ],
+      [
+        1,
+        4,
+        1,
+        0,
+        2,
+        1,
+        5
+      ]
+    ],
+    "per_class": {
+      "entanglement_generation": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 14
+      },
+      "fourier_like": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 14
+      },
+      "phase_oracle_like": {
+        "precision": 0.18181818181818182,
+        "recall": 0.14285714285714285,
+        "f1": 0.16,
+        "support": 14
+      },
+      "amplitude_amplification": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 12
+      },
+      "variational_ansatz": {
+        "precision": 0.15384615384615385,
+        "recall": 0.14285714285714285,
+        "f1": 0.14814814814814817,
+        "support": 14
+      },
+      "hamiltonian_simulation": {
+        "precision": 0.15384615384615385,
+        "recall": 0.16666666666666666,
+        "f1": 0.16,
+        "support": 12
+      },
+      "arithmetic_permutation": {
+        "precision": 0.4166666666666667,
+        "recall": 0.35714285714285715,
+        "f1": 0.3846153846153846,
+        "support": 14
+      }
+    }
   },
   "control_metadata_only": {
     "accuracy": 0.8723404255319149,
     "macro_f1": 0.8737528412580058,
-    "n": 94
+    "n": 94,
+    "confusion": [
+      [
+        12,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2
+      ],
+      [
+        0,
+        14,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        11,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        1,
+        0,
+        11,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        12,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1,
+        0,
+        11,
+        0
+      ],
+      [
+        1,
+        2,
+        0,
+        0,
+        0,
+        0,
+        11
+      ]
+    ],
+    "per_class": {
+      "entanglement_generation": {
+        "precision": 0.8,
+        "recall": 0.8571428571428571,
+        "f1": 0.8275862068965518,
+        "support": 14
+      },
+      "fourier_like": {
+        "precision": 0.8235294117647058,
+        "recall": 1.0,
+        "f1": 0.9032258064516129,
+        "support": 14
+      },
+      "phase_oracle_like": {
+        "precision": 1.0,
+        "recall": 0.7857142857142857,
+        "f1": 0.88,
+        "support": 14
+      },
+      "amplitude_amplification": {
+        "precision": 0.8461538461538461,
+        "recall": 0.9166666666666666,
+        "f1": 0.8799999999999999,
+        "support": 12
+      },
+      "variational_ansatz": {
+        "precision": 1.0,
+        "recall": 0.8571428571428571,
+        "f1": 0.923076923076923,
+        "support": 14
+      },
+      "hamiltonian_simulation": {
+        "precision": 0.9166666666666666,
+        "recall": 0.9166666666666666,
+        "f1": 0.9166666666666666,
+        "support": 12
+      },
+      "arithmetic_permutation": {
+        "precision": 0.7857142857142857,
+        "recall": 0.7857142857142857,
+        "f1": 0.7857142857142857,
+        "support": 14
+      }
+    }
   },
   "generator_disjoint": {
     "pooled": {
       "accuracy": 0.6309523809523809,
       "macro_f1": 0.6225754800035329,
-      "n": 84
+      "n": 84,
+      "confusion": [
+        [
+          8,
+          0,
+          4,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          12,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          5,
+          1,
+          5,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          11,
+          0,
+          0,
+          1
+        ],
+        [
+          2,
+          1,
+          1,
+          0,
+          5,
+          3,
+          0
+        ],
+        [
+          2,
+          1,
+          0,
+          0,
+          3,
+          6,
+          0
+        ],
+        [
+          0,
+          1,
+          3,
+          2,
+          0,
+          0,
+          6
+        ]
+      ],
+      "per_class": {
+        "entanglement_generation": {
+          "precision": 0.47058823529411764,
+          "recall": 0.6666666666666666,
+          "f1": 0.5517241379310345,
+          "support": 12
+        },
+        "fourier_like": {
+          "precision": 0.75,
+          "recall": 1.0,
+          "f1": 0.8571428571428571,
+          "support": 12
+        },
+        "phase_oracle_like": {
+          "precision": 0.38461538461538464,
+          "recall": 0.4166666666666667,
+          "f1": 0.4,
+          "support": 12
+        },
+        "amplitude_amplification": {
+          "precision": 0.7857142857142857,
+          "recall": 0.9166666666666666,
+          "f1": 0.8461538461538461,
+          "support": 12
+        },
+        "variational_ansatz": {
+          "precision": 0.625,
+          "recall": 0.4166666666666667,
+          "f1": 0.5,
+          "support": 12
+        },
+        "hamiltonian_simulation": {
+          "precision": 0.6666666666666666,
+          "recall": 0.5,
+          "f1": 0.5714285714285715,
+          "support": 12
+        },
+        "arithmetic_permutation": {
+          "precision": 0.8571428571428571,
+          "recall": 0.5,
+          "f1": 0.631578947368421,
+          "support": 12
+        }
+      }
     },
     "by_opt": {
       "L0": {
         "accuracy": 0.5714285714285714,
         "macro_f1": 0.5801020408163265,
-        "n": 42
+        "n": 42,
+        "confusion": [
+          [
+            3,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            6,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            3,
+            0,
+            2,
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            5,
+            0,
+            0,
+            1
+          ],
+          [
+            2,
+            1,
+            1,
+            0,
+            2,
+            0,
+            0
+          ],
+          [
+            2,
+            1,
+            0,
+            0,
+            0,
+            3,
+            0
+          ],
+          [
+            0,
+            1,
+            2,
+            0,
+            0,
+            0,
+            3
+          ]
+        ],
+        "per_class": {
+          "entanglement_generation": {
+            "precision": 0.3,
+            "recall": 0.5,
+            "f1": 0.37499999999999994,
+            "support": 6
+          },
+          "fourier_like": {
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "f1": 0.8,
+            "support": 6
+          },
+          "phase_oracle_like": {
+            "precision": 0.25,
+            "recall": 0.3333333333333333,
+            "f1": 0.28571428571428575,
+            "support": 6
+          },
+          "amplitude_amplification": {
+            "precision": 0.8333333333333334,
+            "recall": 0.8333333333333334,
+            "f1": 0.8333333333333334,
+            "support": 6
+          },
+          "variational_ansatz": {
+            "precision": 1.0,
+            "recall": 0.3333333333333333,
+            "f1": 0.5,
+            "support": 6
+          },
+          "hamiltonian_simulation": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6666666666666666,
+            "support": 6
+          },
+          "arithmetic_permutation": {
+            "precision": 0.75,
+            "recall": 0.5,
+            "f1": 0.6,
+            "support": 6
+          }
+        }
       },
       "L2": {
         "accuracy": 0.6904761904761905,
         "macro_f1": 0.6802245373673946,
-        "n": 42
+        "n": 42,
+        "confusion": [
+          [
+            5,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            6,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            2,
+            1,
+            3,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            6,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            3,
+            3,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            3,
+            3,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            2,
+            0,
+            0,
+            3
+          ]
+        ],
+        "per_class": {
+          "entanglement_generation": {
+            "precision": 0.7142857142857143,
+            "recall": 0.8333333333333334,
+            "f1": 0.7692307692307692,
+            "support": 6
+          },
+          "fourier_like": {
+            "precision": 0.8571428571428571,
+            "recall": 1.0,
+            "f1": 0.923076923076923,
+            "support": 6
+          },
+          "phase_oracle_like": {
+            "precision": 0.6,
+            "recall": 0.5,
+            "f1": 0.5454545454545454,
+            "support": 6
+          },
+          "amplitude_amplification": {
+            "precision": 0.75,
+            "recall": 1.0,
+            "f1": 0.8571428571428571,
+            "support": 6
+          },
+          "variational_ansatz": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "support": 6
+          },
+          "hamiltonian_simulation": {
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5,
+            "support": 6
+          },
+          "arithmetic_permutation": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6666666666666666,
+            "support": 6
+          }
+        }
       }
     }
   }

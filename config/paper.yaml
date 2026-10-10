@@ -12,12 +12,14 @@ rf_grid: {n_estimators: [100, 300], max_depth: [null, 20], min_samples_leaf: [1,
 seed: 7
 profiles:
   smoke: {sizes: [24], opt_levels: [0, 2], variants: 3, test_variants: 1, n_splits: 2, rf_grid: {n_estimators: [50], max_depth: [null], min_samples_leaf: [1]},
-            defense: {n_qubits: 24, opt_levels: [0, 2], strategies: [layout, decomp, reorder, decomp+layout], budgets: [0.0, 0.2], qcec_timeout_s: 20, rf_grid: {n_estimators: [50], max_depth: [null], min_samples_leaf: [1]}}}
+            defense: {n_qubits: 24, opt_levels: [0, 2], strategies: [layout, decomp, reorder, decomp+layout, seed], val_variants: 1, n_boot: 100, budgets: [0.0, 0.2], qcec_timeout_s: 20, rf_grid: {n_estimators: [50], max_depth: [null], min_samples_leaf: [1]}}}
   quick: {sizes: [24, 48], opt_levels: [0, 2, 3], variants: 4, test_variants: 1, n_splits: 3}
 defense:
   n_qubits: 24                 # exact logical-equivalence checking (MQT QCEC) was feasible here; 48 qubits not attempted
   opt_levels: [0, 2, 3]
-  strategies: [layout, decomp, reorder, decomp+reorder, decomp+layout, reorder+layout]   # one candidate per strategy
+  strategies: [layout, decomp, reorder, decomp+reorder, decomp+layout, reorder+layout, seed]   # one candidate per strategy; 'seed' = transpiler-seed diversification
+  val_variants: 1                # per generator: 3 train / 1 validation / 2 test sources; test never used for any choice
+  n_boot: 500
   budgets: [0.0, 0.1, 0.2, 0.5]    # max relative increase of depth / 2Q gates / active qubits
   qcec_timeout_s: 30
   rf_grid: {n_estimators: [200], max_depth: [null, 20], min_samples_leaf: [1, 2]}

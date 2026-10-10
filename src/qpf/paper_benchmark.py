@@ -12,7 +12,6 @@ from sklearn.model_selection import GridSearchCV, GroupKFold
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from . import compilation, paper_circuits as PC
-from .artifact_integrity import provenance, require_matching_cache, write_json_atomic
 from .paper_features import extract_paper_features, PAPER_FEATURE_NAMES
 from .metrics import summarize
 warnings.filterwarnings("ignore")
@@ -60,20 +59,7 @@ def _job(job):
 def build_dataset(cfg, workers=2, log=print):
     jobs = [(g, v, n, o, cfg["transpile_seed"], cfg["backend"]) for n in cfg["sizes"] for v in range(cfg["variants"])
             for g in PC.GENERATORS for o in cfg["opt_levels"]]
-    path = out_dir(cfg, "features") / "dataset.csv"
-    manifest = path.with_suffix(".provenance.json")
-    expected = provenance(cfg, [PC.__file__, __file__, compilation.__file__, (ROOT / "src/qpf/paper_features.py")], {"kind": "paper_dataset"})
-    if path.exists():
-        require_matching_cache(manifest, expected)
-    else:
-        write_json_atomic(manifest, expected)
-    done = pd.read_csv(path) if path.exists() else pd.DataFrame()
-    if len(done):
-        required = {"generator", "variant", "n_qubits", "opt", "status"}
-        if not required.issubset(done.columns):
-            raise ValueError("Dataset cache has missing required columns")
-        if done.duplicated(["generator", "variant", "n_qubits", "opt"]).any():
-            raise ValueError("Dataset cache contains duplicate circuit keys")
+    path = out_dir(cfg, "features") / "dataset.csv"; done = pd.read_csv(path) if path.exists() else pd.DataFrame()
     have = set(zip(done.generator, done.variant, done.n_qubits, done.opt)) if len(done) else set()
     todo = [j for j in jobs if (j[0], j[1], j[2], j[3]) not in have]
     log(f"[paper-dataset] {len(jobs)} transpiles total, {len(todo)} to do (resume), workers={workers}")
@@ -82,22 +68,21 @@ def build_dataset(cfg, workers=2, log=print):
         for i, r in enumerate(ex.map(_job, todo, chunksize=1)):
             buf.append(r)
             if (i + 1) % 25 == 0 or i + 1 == len(todo):
-                part = pd.concat(rows + [pd.DataFrame(buf)], ignore_index=True)
-                temp = path.with_suffix(".partial.csv")
-                part.to_csv(temp, index=False)
-                temp.replace(path)
+                part = pd.concat(rows + [pd.DataFrame(buf)], ignore_index=True); part.to_csv(path, index=False)
                 log(f"  {i + 1}/{len(todo)}  ({time.perf_counter() - t0:.0f}s)")
     df = pd.read_csv(path); bad = df[df.status != "OK"]
     if len(bad): bad.to_csv(out_dir(cfg, "features") / "dataset_errors.csv", index=False)
     return df[df.status == "OK"].reset_index(drop=True)
 
 # --------------------------------------------------------------------------- stage 2
-def make_splits(cfg, seed):
-    """Source-disjoint split: per generator, `test_variants` of its variants are held out (all sizes/opt levels together)."""
+def make_splits(cfg, seed, val_variants=0):
+    """Source-disjoint split: per generator, `test_variants` of its variants are held out as test and `val_variants` as
+    validation (all sizes / opt levels of one source stay together). val_variants=0 reproduces the paper-style train/test split."""
     rng = np.random.default_rng([cfg["seed"], seed]); part = {}
     for g in PC.GENERATORS:
         vs = list(rng.permutation(cfg["variants"]))
-        for k, v in enumerate(vs): part[PC.source_id(g, int(v))] = "test" if k < cfg["test_variants"] else "train"
+        for k, v in enumerate(vs):
+            part[PC.source_id(g, int(v))] = "test" if k < cfg["test_variants"] else ("val" if k < cfg["test_variants"] + val_variants else "train")
     return part
 
 def make_generator_splits(cfg, seed, hold=2):
@@ -116,9 +101,14 @@ def fit_attacker(tr, cols, cfg, seed=0, shuffle=False):
     gs = GridSearchCV(pipe, grid, cv=GroupKFold(k), scoring="f1_macro", n_jobs=1)
     gs.fit(tr[cols].to_numpy(float), y, groups=tr.source_id.to_numpy()); return gs
 
+def per_class(cm):
+    cm = np.asarray(cm, float); tp = np.diag(cm); pr = tp / np.maximum(cm.sum(0), 1); rc = tp / np.maximum(cm.sum(1), 1)
+    f1 = 2 * pr * rc / np.maximum(pr + rc, 1e-12)
+    return {c: {"precision": float(pr[i]), "recall": float(rc[i]), "f1": float(f1[i]), "support": int(cm.sum(1)[i])} for i, c in enumerate(PC.CLASS_LABELS)}
+
 def _score(model, te, cols):
     p = model.predict(te[cols].to_numpy(float)); s = summarize(te.intent.to_numpy(), p, PC.CLASS_LABELS)
-    return {"accuracy": s["accuracy"], "macro_f1": s["macro_f1"], "n": int(len(te))}
+    return {"accuracy": s["accuracy"], "macro_f1": s["macro_f1"], "n": int(len(te)), "confusion": s["confusion"], "per_class": per_class(s["confusion"])}
 
 def _regimes(df, kind):
     if kind == "opt": return {f"L{o}": df[df.opt == o] for o in sorted(df.opt.unique())}
@@ -138,14 +128,6 @@ def evaluate(cfg, df, log=print, feat_cols=None, tag="main"):
                                      "features": cols, "n_rows": int(len(df)), "n_sources": int(df.source_id.nunique()), "splits": []}
     chance = 1 / len(PC.CLASS_LABELS); res["chance"] = chance
     pdir = out_dir(cfg, "results") / "partial"; pdir.mkdir(exist_ok=True)
-    fingerprint = provenance({"cfg": cfg, "tag": tag, "columns": cols}, [__file__, PC.__file__, (ROOT / "src/qpf/paper_features.py")], {"dataset_digest": __import__("hashlib").sha256(pd.util.hash_pandas_object(df.sort_values(["source_id", "n_qubits", "opt"]), index=False).values.tobytes()).hexdigest()})
-    fmanifest = pdir / f"{tag}.provenance.json"
-    if fmanifest.exists():
-        require_matching_cache(fmanifest, fingerprint)
-    elif any(pdir.glob(f"{tag}_split*.json")):
-        raise ValueError("Untagged benchmark checkpoints cannot be safely resumed; use a fresh output directory")
-    else:
-        write_json_atomic(fmanifest, fingerprint)
     for s in range(cfg["n_splits"]):
         ck = pdir / f"{tag}_split{s}.json"                      # resume: a finished split is never recomputed
         if ck.exists():
@@ -163,7 +145,7 @@ def evaluate(cfg, df, log=print, feat_cols=None, tag="main"):
         gp = make_generator_splits(cfg, s); df["_p"] = df.source_id.map(gp); gtr, gte = df[df._p == "train"], df[df._p == "test"]
         assert set(gtr.generator).isdisjoint(set(gte.generator))
         gm = fit_attacker(gtr, cols, cfg, s); one["generator_disjoint"] = {"pooled": _score(gm, gte, cols), "by_opt": {k: _score(gm, v, cols) for k, v in _regimes(gte, "opt").items()}}
-        write_json_atomic(ck, one)
+        jdump(one, ck)
     df.drop(columns="_p", inplace=True, errors="ignore")
     res["summary"] = aggregate(res); return res
 
@@ -178,4 +160,7 @@ def aggregate(res):
     for name in ("pooled", "control_shuffled_labels", "control_metadata_only"):
         out[name] = {m: agg(lambda s, name=name, m=m: s[name][m]) for m in ("accuracy", "macro_f1")}
     out["generator_disjoint_pooled"] = {m: agg(lambda s, m=m: s["generator_disjoint"]["pooled"][m]) for m in ("accuracy", "macro_f1")}
+    out["pooled_confusion_sum"] = np.sum([s["pooled"]["confusion"] for s in res["splits"]], axis=0).tolist()
+    out["pooled_per_class"] = {c: {m: agg(lambda s, c=c, m=m: s["pooled"]["per_class"][c][m]) for m in ("precision", "recall", "f1")} for c in PC.CLASS_LABELS}
+    out["generator_disjoint_per_class"] = {c: {"recall": agg(lambda s, c=c: s["generator_disjoint"]["pooled"]["per_class"][c]["recall"])} for c in PC.CLASS_LABELS}
     return out

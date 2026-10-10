@@ -52,3 +52,24 @@ def test_reordering_is_proven_by_dag_identity_and_wrong_circuit_never_passes():
     assert verification.verify(base, cand).method in ("dag_identity",)
     a = QuantumCircuit(3); a.cx(0, 1); a.cx(1, 2); r = QuantumCircuit(3); r.cx(1, 2); r.cx(0, 1)
     assert verification.verify(a, r).status != "PASS"
+
+
+def test_dag_identity_shortcut_checks_parameters_operands_and_order():
+    from qiskit import QuantumCircuit
+    from qpf import verification
+    a = QuantumCircuit(3); a.rz(0.3, 0); a.cx(0, 1); a.x(2); a.cx(1, 2)
+    same = QuantumCircuit(3); same.x(2); same.rz(0.3, 0); same.cx(0, 1); same.cx(1, 2)   # independent ops interleaved: identical DAG
+    assert verification.verify(a, same).method == "dag_identity"
+    diff_param = QuantumCircuit(3); diff_param.rz(0.31, 0); diff_param.cx(0, 1); diff_param.x(2); diff_param.cx(1, 2)
+    diff_operand = QuantumCircuit(3); diff_operand.rz(0.3, 0); diff_operand.cx(1, 0); diff_operand.x(2); diff_operand.cx(1, 2)
+    diff_order = QuantumCircuit(3); diff_order.rz(0.3, 0); diff_order.x(2); diff_order.cx(1, 2); diff_order.cx(0, 1)   # non-commuting swap (shares qubit 1)
+    diff_gate = QuantumCircuit(3); diff_gate.rz(0.3, 0); diff_gate.cz(0, 1); diff_gate.x(2); diff_gate.cx(1, 2)
+    for bad in (diff_param, diff_operand, diff_order, diff_gate):
+        v = verification.verify(a, bad, qcec_timeout_s=10); assert v.status != "PASS" and v.method != "dag_identity"
+
+
+def test_unverified_candidates_are_rejected_by_selection():
+    import pandas as pd
+    from qpf import selection
+    for st in ("UNKNOWN", "FAIL", "ERROR"):
+        r = pd.Series(dict(strategy="decomp", verify_status=st, depth=5, d_depth=0, d_n2q=0, d_active=0)); assert "verification" in selection.reject_reason(r, 1.0)
