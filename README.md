@@ -275,7 +275,7 @@ Tests cover split disjointness, deterministic features, equivalence verification
 
 ## Research Basis
 
-QPF was motivated by **Beat Buesser and Anil Kurmus, IBM Research**, *Algorithmic Intent Leakage in Transpiled Quantum Circuits: An Initial Reverse-Engineering Study*, IEEE Quantum Week 2026.
+QPF was motivated by **Beat Buesser and Anil Kurmus, IBM Research**, *Algorithmic Intent Leakage in Transpiled Quantum Circuits: An Initial Reverse-Engineering Study*, IEEE 2026
 
 This repository is an independent implementation, not IBM Research source code or an official IBM project.
 
