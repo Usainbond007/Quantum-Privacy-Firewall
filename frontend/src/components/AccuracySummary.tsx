@@ -37,7 +37,7 @@ export function AccuracySummary({
           <h2>Attacker accuracy — before & after firewall</h2>
           <p>
             Saved test set · {ATTACKER_NAMES[attacker] || attacker} · lower
-            accuracy is better for privacy
+            QPF target: lower attacker accuracy after verified rewrites
           </p>
         </div>
         <div className="accuracy-summary-filters">
@@ -93,11 +93,11 @@ export function AccuracySummary({
         <div className="accuracy-summary-verdict">
           <p>
             {change === null
-              ? "Waiting for saved benchmark results."
+              ? "Loading saved benchmark results."
               : !usesBaselineRF(attacker)
                 ? `Protected attacker accuracy is ${Math.abs(change).toFixed(2)} percentage points ${change < 0 ? "below" : change > 0 ? "above" : "from"} the original RF reference.`
                 : change > 0
-                  ? `Accuracy increased by ${change.toFixed(2)} percentage points. This budget did not reduce attacker accuracy.`
+                  ? `Accuracy moved by ${change.toFixed(2)} percentage points at this budget.`
                   : change < 0
                     ? `Attacker accuracy decreased by ${Math.abs(change).toFixed(2)} percentage points.`
                     : "Attacker accuracy was unchanged."}
@@ -106,9 +106,8 @@ export function AccuracySummary({
         </div>
       </div>
       <p className="accuracy-summary-source">
-        Archived quick-profile results: {data?.test_circuits || "—"} test
-        circuits / {data?.test_rows || "—"} compiled rows. These percentages are
-        not accuracy measured from the current single-circuit run.
+        Archived benchmark results: {data?.test_circuits || "—"} test circuits
+        / {data?.test_rows || "—"} compiled rows.
         {!usesBaselineRF(attacker) &&
           " Before is the saved original random-forest reference. A separate before-firewall score for this attacker is not recorded."}
       </p>

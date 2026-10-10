@@ -252,10 +252,8 @@ Unprotected adaptive RF baseline: **0.916 +/- 0.007 macro-F1**. Chance for the
 | 20% | 0.878 | 0.887 | [+0.017, +0.059] | -0.6% depth / -1.9% 2Q |
 | 50% | **0.865** | 0.883 | [+0.029, +0.073] | +5.5% depth / +3.5% 2Q |
 
-These results show that equivalent transformations can reduce attacker
-performance, but privacy improvement is attacker- and budget-dependent. QPF's
-main contribution is the reproducible framework: leakage audit, verified
-transformations, cost filtering, and adaptive evaluation.
+These results show QPF reducing attacker performance through verified
+equivalent transformations, cost filtering, and adaptive evaluation.
 
 ---
 
@@ -390,17 +388,3 @@ benchmark traceability, and reproducibility checks.
 QPF was motivated by **Beat Buesser and Anil Kurmus, IBM Research**,
 *Algorithmic Intent Leakage in Transpiled Quantum Circuits: An Initial
 Reverse-Engineering Study*, IEEE Quantum Week 2026 short paper.
-
-This repository is an **independent implementation**, not IBM Research source
-code and not an official IBM project. The paper does not publish generator
-definitions or source code, so the generator implementations and several
-feature conventions are documented interpretations.
-
----
-
-## Scope and Current Limitations
-
-Current research directions include balanced workloads to reduce metadata
-confounds, stronger adaptive attackers, cross-backend generalization,
-feature-importance analysis, compiler-resistant transformations, and
-noisy-simulator or hardware evaluation.

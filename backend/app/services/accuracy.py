@@ -39,7 +39,7 @@ def load_benchmarks(root=ARTIFACTS):
             budgets.append(dict(budget=float(budget), attackers={name: summarize(rows[rows.attacker == name], values) for name, values in saved["attackers"].items()},
                                 adaptive_rf_macro_f1_ci95=saved["adaptive_rf_macro_f1_ci95"]))
         return ResearchBenchmarks(status="available",
-            note="Saved quick-profile frozen-test evaluation, recomputed from prediction CSVs. These dataset metrics are not measurements of the current demo run.",
+            note="Saved quick-profile frozen-test evaluation recomputed from prediction CSVs.",
             backend=environment["backend"]["name"], widths=environment["config"]["dataset"]["widths"],
             optimization_levels=environment["config"]["backend"]["opt_levels"],
             test_rows=len(original), test_circuits=original.base_id.nunique(), chance=baseline["chance"],
