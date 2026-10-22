@@ -1,0 +1,22 @@
+strategy,seed,verify,verify_method,d_depth,d_2q,conf,pred,ok
+layout,0,PASS (identical_logical_circuit),identical_logical_circuit,0.25159235668789814,0.3475258918296893,0.41333333333333333,fourier_like,False
+layout,1,PASS (identical_logical_circuit),identical_logical_circuit,0.3471337579617835,0.30724971231300335,0.48,fourier_like,False
+layout,2,PASS (identical_logical_circuit),identical_logical_circuit,0.20169851380042458,0.24856156501726123,0.6133333333333333,fourier_like,False
+decomp,0,PASS (mqt_qcec),mqt_qcec,0.013800424628450214,0.1518987341772151,0.7633333333333333,fourier_like,True
+decomp,1,PASS (mqt_qcec),mqt_qcec,-0.04458598726114649,0.1622554660529345,0.63,fourier_like,True
+decomp,2,PASS (mqt_qcec),mqt_qcec,-0.07430997876857748,0.11852704257767543,0.6666666666666666,fourier_like,True
+reorder,0,PASS (dag_identity),dag_identity,0.0,0.0,0.9966666666666667,fourier_like,True
+reorder,1,PASS (dag_identity),dag_identity,0.0,0.0,0.9966666666666667,fourier_like,True
+reorder,2,PASS (dag_identity),dag_identity,0.0,0.0,0.9966666666666667,fourier_like,True
+decomp+reorder,0,PASS (mqt_qcec),mqt_qcec,0.14118895966029732,0.19332566168009202,0.6033333333333334,fourier_like,True
+decomp+reorder,1,PASS (mqt_qcec),mqt_qcec,-0.02441613588110403,0.03797468354430378,0.99,fourier_like,True
+decomp+reorder,2,PASS (mqt_qcec),mqt_qcec,-0.0987261146496815,0.1438434982738781,0.51,fourier_like,True
+decomp+layout,0,PASS (mqt_qcec),mqt_qcec,0.3821656050955413,0.333716915995397,0.5166666666666667,fourier_like,False
+decomp+layout,1,PASS (mqt_qcec),mqt_qcec,0.2951167728237791,0.4211737629459149,0.39666666666666667,fourier_like,False
+decomp+layout,2,PASS (mqt_qcec),mqt_qcec,0.1454352441613589,0.37399309551208293,0.33666666666666667,fourier_like,False
+reorder+layout,0,PASS (dag_identity),dag_identity,0.31953290870488327,0.39585730724971224,0.42333333333333334,fourier_like,False
+reorder+layout,1,PASS (dag_identity),dag_identity,0.34607218683651797,0.33601841196777915,0.44666666666666666,fourier_like,False
+reorder+layout,2,PASS (dag_identity),dag_identity,0.16348195329087045,0.2784810126582278,0.5233333333333333,fourier_like,False
+seed,0,PASS (identical_logical_circuit),identical_logical_circuit,0.01273885350318471,0.03912543153049475,0.9966666666666667,fourier_like,True
+seed,1,PASS (identical_logical_circuit),identical_logical_circuit,0.013800424628450214,-0.010356731875719172,0.9933333333333333,fourier_like,True
+seed,2,PASS (identical_logical_circuit),identical_logical_circuit,-0.05520169851380041,0.016110471806674243,1.0,fourier_like,True

@@ -4,7 +4,6 @@ All experiments are COMPLETE; nothing is running. Last full-run date: container 
 
 ## Done and verified
 - `pytest tests backend/tests` → **167 passed** (generator semantics, splits, features, budgets, equivalence incl. wrong circuits and DAG-shortcut hardening, backend API).
-- Frontend (`npm ci`, `npx vitest run`, `npm run build`) passed earlier in this session (8 tests); frontend code unchanged since.
 - Benchmark (`artifacts/paper_full/results/paper_benchmark.json`, `paper_comparison.{md,csv,json}`) and defense (`paper_defense.json`, `defense_summary.{md,csv}`) generated from the final code and the final dataset (hash in `logs/`), with 5 splits each.
 - Generator audit: `docs/GENERATOR_AUDIT.md` (24 semantic / 20 structural / 3 analogue of 47).
 

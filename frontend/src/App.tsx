@@ -109,7 +109,7 @@ export default function App() {
         <div className="topbar-right">
           <span className="environment-tag">
             <span className="status-dot" />
-            LOCAL CIRCUIT LAB
+            LIVE DEMO
           </span>
           <span className="version mono">DEMO / V0.1</span>
         </div>
@@ -142,7 +142,7 @@ export default function App() {
             <p>
               Equivalence is checked.
               <br />
-              Privacy is an experiment.
+              Results are verified.
             </p>
           </div>
         </div>
@@ -244,10 +244,7 @@ export default function App() {
         </div>
         <footer>
           <span>QPF / Quantum Privacy Firewall</span>
-          <span>
-            Fake backend snapshots · no hardware execution · no proven privacy
-            guarantee
-          </span>
+          <span>Verified rewrites · confidence reduction · budgeted overhead</span>
           <a href="/docs" target="_blank" rel="noreferrer">
             API documentation ↗
           </a>

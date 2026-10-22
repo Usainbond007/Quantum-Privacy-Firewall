@@ -1,6 +1,0 @@
-name: FakeNighthawk
-opt_levels: [0, 1, 2, 3]
-transpile_seed: 11
-profiles:
-  smoke: {opt_levels: [0, 2]}
-  quick: {opt_levels: [0, 2]}
