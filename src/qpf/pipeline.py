@@ -254,7 +254,7 @@ def evaluate_adaptive(cfg):
     report.frontier(out, art(cfg, "figures") / "privacy_cost_frontier.png")
     jdump(out, art(cfg, "results") / "adaptive.json"); return out
 
-# ---------------------------------------------------------------- release gate
+# ---------------------------------------------------------------- final consistency checks
 def release_gate(cfg):
     g = {}; man = load_manifest(cfg)
     try: check_disjoint(man); [check_disjoint(pd.read_csv(art(cfg, "features") / f)) for f in ("baseline.csv", "candidates.csv")]; g["split_disjoint"] = True
