@@ -148,7 +148,7 @@ def test_controlled_swap_network_structure():
     n = 9; o = ops(PC.controlled_swap_network(n, R())); k = (n - 1) // 2
     assert [g for g in o if g[0] == "cswap"] == [("cswap", (0, 1 + i, 1 + k + i)) for i in range(k)]
 
-# ---- analogues: honest minimal checks
+# ---- analogue generators: minimal checks
 @pytest.mark.parametrize("gen", ["qft_phase_gradient", "amplitude_estimation_style", "approx_qft"])
 def test_analogue_generators_are_normalised_states(gen):
     assert np.isclose(np.linalg.norm(sv(PC._FN[gen](10, R())).data), 1)
