@@ -6,9 +6,6 @@ __pycache__/
 .pytest_cache/
 pytest-cache-files-*/
 runtime/
-*.tsbuildinfo
 frontend/node_modules/
 frontend/dist/
-.ipynb_checkpoints/
-.mplconfig/
-**/.mplconfig/
+*.tsbuildinfo

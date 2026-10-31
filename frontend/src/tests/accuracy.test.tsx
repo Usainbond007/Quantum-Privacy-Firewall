@@ -45,7 +45,7 @@ it("shows dataset metrics, changes budget and attacker, and opens confusion matr
     screen.getByRole("heading", { name: "Normalization-aware random forest" }),
   ).toBeTruthy();
   expect(
-    screen.getByText(/Metadata-only and full-feature attackers are shown/),
+    screen.getByText(/Metadata-only classification is nearly as strong/),
   ).toBeTruthy();
 });
 

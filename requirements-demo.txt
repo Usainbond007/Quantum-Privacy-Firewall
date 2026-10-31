@@ -1,0 +1,17 @@
+# Tested local presentation runtime. Install from the repository root.
+-e .
+qiskit==2.5.2
+qiskit-ibm-runtime==0.50.0
+scikit-learn==1.9.1
+numpy==2.4.4
+pandas==3.0.2
+networkx==3.6.1
+mqt-qcec==3.10.2
+mqt-core==3.10.1
+PyYAML==6.0.3
+matplotlib==3.10.8
+joblib==1.5.3
+fastapi==0.162.0
+uvicorn==0.54.0
+httpx==0.28.1
+pytest==9.2.0

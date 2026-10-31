@@ -1,6 +1,6 @@
 {
   "status": "available",
-  "note": "Saved quick-profile frozen-test evaluation recomputed from prediction CSVs.",
+  "note": "Saved quick-profile frozen-test evaluation, recomputed from prediction CSVs. These dataset metrics are not measurements of the current demo run.",
   "profile": "quick",
   "backend": "FakeNighthawk",
   "widths": [6, 8],

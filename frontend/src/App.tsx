@@ -1,255 +1,139 @@
-import { useEffect, useRef, useState } from "react";
-import { CircuitControls } from "./components/CircuitControls";
-import { CircuitComparison } from "./components/CircuitComparison";
-import { MetricCards } from "./components/MetricCards";
-import { VerificationPanel } from "./components/VerificationPanel";
-import { CandidateTable } from "./components/CandidateTable";
-import { RunProgress } from "./components/RunProgress";
-import { CircuitViewer } from "./components/CircuitViewer";
-import { AccuracyPanel } from "./components/AccuracyPanel";
-import { AccuracySummary } from "./components/AccuracySummary";
-import { useRun } from "./hooks/useRun";
+import { useEffect, useState } from "react";
+import LabApp from "./LabApp";
+import { CasePage, ResearchPage } from "./components/ResearchDesk";
 import { api } from "./lib/api";
-import type {
-  Candidate,
-  Circuit,
-  Options,
-  RunRequest,
-  ResearchBenchmarks,
-} from "./types/demo";
 
-const initial: RunRequest = {
-  family: "graph_ghz",
-  width: 4,
-  seed: 21,
-  backend: "FakeNighthawk",
-  optimization_level: 2,
-  transpile_seed: 11,
-  candidates: 6,
-  budget: 0.2,
-  strategies: ["layout", "decomp+layout", "decomp+reorder"],
+type Page = "cryptanalysis" | "portfolio" | "lab" | "research";
+const pages: [Page, string, string][] = [
+  ["cryptanalysis", "Confidential", "Cryptanalysis"],
+  ["portfolio", "Portfolio", "Optimization"],
+  ["lab", "Circuit Lab", ""],
+  ["research", "Research & evidence", ""],
+];
+const fromHash = (): Page => {
+  const v = location.hash.slice(1);
+  return pages.some(([p]) => p === v) ? (v as Page) : "cryptanalysis";
 };
-
 export default function App() {
-  const [options, setOptions] = useState<Options | null>(null);
-  const [config, setConfig] = useState(initial);
-  const [preview, setPreview] = useState<Circuit | null>(null);
-  const [previewing, setPreviewing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [inspecting, setInspecting] = useState<Candidate | null>(null);
-  const [optionRetry, setOptionRetry] = useState(0);
-  const [benchmarks, setBenchmarks] = useState<ResearchBenchmarks | null>(null);
-  const [benchmarkError, setBenchmarkError] = useState<string | null>(null);
-  const [benchmarkRetry, setBenchmarkRetry] = useState(0);
-  const [researchBudget, setResearchBudget] = useState(0.2);
-  const [researchAttacker, setResearchAttacker] = useState("adaptive_rf");
-  const previewController = useRef<AbortController | null>(null);
-  const { run, error: runError, submit, retry, busy } = useRun();
-  const result = run?.result || null;
+  const [page, setPage] = useState<Page>(fromHash);
+  const [labVisited, setLabVisited] = useState(page === "lab");
+  const [connected, setConnected] = useState<boolean | null>(null);
+  const [retry, setRetry] = useState(0);
   useEffect(() => {
-    const controller = new AbortController();
-    setError(null);
-    api
-      .options(controller.signal)
-      .then(setOptions)
-      .catch((err) => {
-        if (!controller.signal.aborted) setError(err.message);
-      });
-    return () => controller.abort();
-  }, [optionRetry]);
-  useEffect(() => () => previewController.current?.abort(), []);
+    const f = () => setPage(fromHash());
+    window.addEventListener("hashchange", f);
+    return () => window.removeEventListener("hashchange", f);
+  }, []);
   useEffect(() => {
-    const controller = new AbortController();
-    setBenchmarkError(null);
+    if (page === "lab") setLabVisited(true);
+    window.scrollTo(0, 0);
+  }, [page]);
+  useEffect(() => {
+    const c = new AbortController();
+    setConnected(null);
     api
-      .benchmarks(controller.signal)
-      .then(setBenchmarks)
-      .catch((err) => {
-        if (!controller.signal.aborted)
-          setBenchmarkError(
-            err instanceof Error ? err.message : "Benchmark request failed",
-          );
+      .options(c.signal)
+      .then(() => setConnected(true))
+      .catch(() => {
+        if (!c.signal.aborted) setConnected(false);
       });
-    return () => controller.abort();
-  }, [benchmarkRetry]);
-  async function generatePreview() {
-    previewController.current?.abort();
-    const controller = new AbortController();
-    previewController.current = controller;
-    setPreviewing(true);
-    setError(null);
-    try {
-      const next = await api.preview(
-        { family: config.family, width: config.width, seed: config.seed },
-        controller.signal,
-      );
-      if (!controller.signal.aborted) setPreview(next);
-    } catch (err) {
-      if (!controller.signal.aborted)
-        setError(err instanceof Error ? err.message : "Preview failed");
-    } finally {
-      if (!controller.signal.aborted) setPreviewing(false);
-    }
-  }
-  function changeConfig(next: RunRequest) {
-    previewController.current?.abort();
-    setPreviewing(false);
-    setPreview(null);
-    setConfig(next);
-  }
+    return () => c.abort();
+  }, [retry]);
   return (
-    <div className="app-shell">
-      <header className="topbar">
-        <a href="/" className="brand">
-          <span className="brand-mark">Q</span>
-          <span>
-            QUANTUM PRIVACY<span className="brand-sub">FIREWALL</span>
-          </span>
+    <div className="desk">
+      <aside className="desk-sidebar">
+        <a className="desk-brand" href="#cryptanalysis">
+          <strong>
+            QPF<span>.</span>
+          </strong>
+          <span>Quantum Privacy Firewall</span>
         </a>
-        <div className="topbar-right">
-          <span className="environment-tag">
-            <span className="status-dot" />
-            LIVE DEMO
-          </span>
-          <span className="version mono">DEMO / V0.1</span>
-        </div>
-      </header>
-      <main>
-        <AccuracySummary
-          data={result?.benchmarks || benchmarks}
-          budget={researchBudget}
-          onBudgetChange={setResearchBudget}
-          attacker={researchAttacker}
-          onAttackerChange={setResearchAttacker}
-        />
-        <div className="hero">
-          <div>
-            <div className="eyebrow accent">Pre-submission circuit audit</div>
-            <h1>
-              Same computation.
-              <br />
-              <span>A different signature.</span>
-            </h1>
-            <p>
-              Explore circuit transformations, verify their semantics,
-              <br className="desktop-break" /> and inspect the trade-off in
-              compiled structure.
-            </p>
-          </div>
-          <div className="hero-aside">
-            <span className="mono">GENERATE → TRANSFORM → VERIFY</span>
-            <div className="hero-line" />
-            <p>
-              Equivalence is checked.
-              <br />
-              Results are verified.
-            </p>
-          </div>
-        </div>
-        {(error || runError) && (
-          <div className="error-banner" role="alert">
-            <span>{error || runError}</span>
-            {!options ? (
-              <button onClick={() => setOptionRetry((x) => x + 1)}>
-                Retry connection
-              </button>
-            ) : runError && busy ? (
-              <button onClick={retry}>Retry polling</button>
-            ) : error ? (
-              <button onClick={() => setError(null)}>Dismiss</button>
-            ) : null}
-          </div>
-        )}
-        <div className="lab-grid">
-          {options ? (
-            <CircuitControls
-              options={options}
-              value={config}
-              onChange={changeConfig}
-              onPreview={() => void generatePreview()}
-              onRun={() => {
-                previewController.current?.abort();
-                setPreviewing(false);
-                setPreview(null);
-                setInspecting(null);
-                setError(null);
-                void submit(config);
-              }}
-              busy={busy}
-              previewing={previewing}
-            />
-          ) : (
-            <aside className="panel controls">
-              <h2>Connecting to circuit engine…</h2>
-              <p className="hint">Start the FastAPI server on port 8000.</p>
-            </aside>
-          )}
-          <div className="workspace">
-            <RunProgress run={run} />
-            {result && (
-              <div
-                className={`outcome-banner ${result.selected ? "success" : ""}`}
-              >
-                <span>{result.selected ? "✓" : "∅"}</span>
-                <div>
-                  <strong>{result.message}</strong>
-                  <p>
-                    {result.selected
-                      ? `${result.selected.strategy.replaceAll("+", " + ")} · both equivalence checks PASS · overhead within ${(result.request.budget * 100).toFixed(0)}%`
-                      : "All candidates were unchanged, outside the budget, or lacked verified equivalence."}
-                  </p>
-                </div>
-                <div className="export-buttons">
-                  <a href={api.exportUrl(run!.id, "qasm")} download>
-                    ↓ QASM
-                  </a>
-                  <a href={api.exportUrl(run!.id, "metrics")} download>
-                    ↓ Evidence
-                  </a>
-                </div>
-              </div>
-            )}
-            <MetricCards result={result} />
-            <AccuracyPanel
-              benchmarks={benchmarks}
-              result={result}
-              error={benchmarkError}
-              onRetry={() => setBenchmarkRetry((x) => x + 1)}
-              researchBudget={researchBudget}
-              onResearchBudgetChange={setResearchBudget}
-              researchAttacker={researchAttacker}
-              onResearchAttackerChange={setResearchAttacker}
-            />
-            <CircuitComparison preview={preview} result={result} />
-            {result && (
-              <>
-                <VerificationPanel result={result} inspecting={inspecting} />
-                <CandidateTable
-                  result={result}
-                  inspecting={inspecting}
-                  onInspect={setInspecting}
-                />
-                {inspecting?.circuit && (
-                  <div className="panel">
-                    <CircuitViewer
-                      key={inspecting.id}
-                      circuit={inspecting.circuit}
-                      title={`Inspecting ${inspecting.id}`}
-                    />
-                  </div>
+        <div className="nav-caption">RESEARCH WORKSPACE</div>
+        <nav aria-label="Main navigation">
+          {pages.map(([id, a, b], i) => (
+            <a
+              key={id}
+              href={`#${id}`}
+              aria-current={page === id ? "page" : undefined}
+            >
+              <span className="nav-number">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <span>
+                {a}
+                {b && (
+                  <>
+                    <br />
+                    {b}
+                  </>
                 )}
-              </>
-            )}
-          </div>
+              </span>
+            </a>
+          ))}
+        </nav>
+        <div className="sidebar-note">
+          <span className="eyebrow">THE PRINCIPLE</span>
+          <p>
+            Verify the computation.
+            <br />
+            Test the disclosure.
+            <br />
+            Explain the decision.
+          </p>
+          <small>
+            Independent research prototype
+            <br />
+            Q-Hack India · 2026
+          </small>
         </div>
-        <footer>
-          <span>QPF / Quantum Privacy Firewall</span>
-          <span>Verified rewrites · confidence reduction · budgeted overhead</span>
+      </aside>
+      <div className="desk-main">
+        <header className="desk-top">
+          <span>
+            Research desk <span className="header-divider">/</span>{" "}
+            <strong>
+              {page === "lab"
+                ? "Circuit lab"
+                : page === "research"
+                  ? "Evidence & methods"
+                  : "Use cases"}
+            </strong>
+          </span>
+          <div className="connection">
+            <span className={`connection-dot ${connected ? "online" : ""}`} />
+            {connected === null
+              ? "Connecting to engine"
+              : connected
+                ? "Local API connected"
+                : "API unavailable"}
+            {connected === false && (
+              <button onClick={() => setRetry((r) => r + 1)}>Retry</button>
+            )}
+            <span className="small-tag">Simulation only</span>
+          </div>
+        </header>
+        <main className="desk-content">
+          <div hidden={page !== "cryptanalysis"}>
+            <CasePage kind="cryptanalysis" />
+          </div>
+          <div hidden={page !== "portfolio"}>
+            <CasePage kind="portfolio" />
+          </div>
+          {labVisited && (
+            <div hidden={page !== "lab"} className="legacy-lab">
+              <LabApp />
+            </div>
+          )}
+          {page === "research" && <ResearchPage />}
+        </main>
+        <footer className="desk-footer">
+          <span>QPF · Observe → Rewrite → Verify → Assess</span>
+          <span>Local assessment only. No cloud submission.</span>
           <a href="/docs" target="_blank" rel="noreferrer">
             API documentation ↗
           </a>
         </footer>
-      </main>
+      </div>
     </div>
   );
 }
