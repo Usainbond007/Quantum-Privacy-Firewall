@@ -218,7 +218,7 @@ describe("full frontend workflow", () => {
       ),
     ).toBeTruthy();
   });
-  it("shows before/after accuracy above the hero and keeps research budgets in sync", async () => {
+  it("shows before/after accuracy below the workbench and keeps research budgets in sync", async () => {
     const user = userEvent.setup();
     vi.spyOn(api, "options").mockResolvedValue(options);
     render(<App />);
@@ -233,8 +233,8 @@ describe("full frontend workflow", () => {
     expect(within(overview).getByText("Before firewall accuracy")).toBeTruthy();
     expect(within(overview).getByText("After firewall accuracy")).toBeTruthy();
     expect(
-      overview.compareDocumentPosition(
-        screen.getByRole("heading", { level: 1 }),
+      screen.getByRole("heading", { level: 1 }).compareDocumentPosition(
+        overview,
       ) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     await user.selectOptions(
@@ -280,6 +280,14 @@ describe("full frontend workflow", () => {
     await user.click(screen.getByRole("button", { name: /candidate-01/ }));
     expect(screen.getByText("Inspecting candidate-01")).toBeTruthy();
     expect(screen.getAllByText("PASS").length).toBeGreaterThan(3);
+  });
+
+  it("switches the circuit family from a demo preset", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(api, "options").mockResolvedValue(options);
+    render(<App />);
+    await user.click(await screen.findByRole("button", { name: "QFT" }));
+    expect((screen.getByLabelText("Algorithm family") as HTMLSelectElement).value).toBe("qft");
   });
 
   it("displays actionable submission errors", async () => {

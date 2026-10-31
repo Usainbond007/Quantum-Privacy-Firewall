@@ -11,7 +11,7 @@ export function CandidateTable({
   onInspect: (candidate: Candidate) => void;
 }) {
   return (
-    <section className="panel candidates">
+    <section className="panel candidates" id="candidate-search">
       <div className="section-title justify-between">
         <div className="flex items-center gap-3">
           <span className="step-number">04</span>

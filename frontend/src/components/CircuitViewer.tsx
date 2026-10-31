@@ -97,7 +97,7 @@ export function CircuitViewer({
             return (
               <g
                 key={g.id}
-                className={`gate ${multi ? "multi" : ""}`}
+                className={`gate ${multi ? "multi" : ""} gate-${g.name.replace(/[^a-z0-9]/gi, "-")}`}
                 tabIndex={0}
                 role="button"
                 aria-label={`${label} on ${g.qubits.join(", ")}`}

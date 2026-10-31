@@ -79,11 +79,7 @@ export function CircuitComparison({
       ) : (
         <div className="workspace-empty">
           <div className="quantum-mark">|ψ⟩</div>
-          <h3>A circuit’s structure tells a story.</h3>
-          <p>
-            Preview an input, then explore how verified transformations change
-            its compiled structure.
-          </p>
+          <h3>No circuit loaded</h3>
           <div className="empty-wires">
             <span>q0 ─── H ───●─────────</span>
             <span>q1 ──────── ⊕ ── RZ ──</span>

@@ -39,7 +39,27 @@ export function CircuitControls({
     <aside className="panel controls">
       <div className="section-title">
         <span className="step-number">01</span>
-        <h2>Configure circuit</h2>
+        <h2>Configure a run</h2>
+      </div>
+      <div className="preset-row" role="group" aria-label="Circuit examples">
+        {([
+          ["grover", "Grover"],
+          ["qaoa", "QAOA"],
+          ["qft", "QFT"],
+        ] as const)
+          .filter(([family]) => options.families.includes(family))
+          .map(([family, label]) => (
+            <button
+              key={family}
+              type="button"
+              className={value.family === family ? "active" : ""}
+              aria-pressed={value.family === family}
+              disabled={busy}
+              onClick={() => update("family", family)}
+            >
+              {label}
+            </button>
+          ))}
       </div>
       <fieldset disabled={busy}>
         <label>
@@ -180,9 +200,6 @@ export function CircuitControls({
         {busy ? "Run in progress…" : "Run firewall"}
         <span aria-hidden="true">↗</span>
       </button>
-      <p className="hint text-center">
-        Deterministic seeds. Local fake backend. No hardware submission.
-      </p>
     </aside>
   );
 }
