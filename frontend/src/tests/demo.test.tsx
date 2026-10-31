@@ -140,11 +140,29 @@ describe("circuit interactions", () => {
     expect(screen.getByText("q0: p2 → p8")).toBeTruthy();
   });
 
+  it("keeps large circuit previews readable and can reveal every wire", async () => {
+    const user = userEvent.setup();
+    const large = {
+      ...circuit,
+      num_qubits: 24,
+      logical_width: 24,
+      qubits: Array.from({ length: 24 }, (_, index) => index),
+      gates: [circuit.gates[0], circuit.gates[1]],
+    };
+    render(<CircuitViewer circuit={large} title="Recorded circuit" changedGateIds={new Set([0])} />);
+    expect(screen.getByRole("button", { name: /Showing 2 active wires/ })).toBeTruthy();
+    expect(screen.queryByText("q1 |0⟩")).toBeNull();
+    expect(document.querySelectorAll(".gate-changed")).toHaveLength(1);
+    await user.click(screen.getByRole("button", { name: /show all 24/ }));
+    expect(screen.getByText("q1 |0⟩")).toBeTruthy();
+  });
+
   it("shows a fresh preview after a completed run and exposes the no-change outcome", async () => {
     const { rerender } = render(
       <CircuitComparison preview={null} result={result} />,
     );
     expect(screen.getByText("Selected compilation")).toBeTruthy();
+    expect(screen.getByLabelText("Circuit changes").textContent).toContain("Gate-pattern changes");
     rerender(<CircuitComparison preview={circuit} result={result} />);
     await waitFor(() =>
       expect(screen.getByText("Input circuit preview")).toBeTruthy(),

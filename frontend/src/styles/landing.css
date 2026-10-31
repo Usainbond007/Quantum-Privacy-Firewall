@@ -28,7 +28,8 @@ button, input, select, textarea, .controls .section-title h2, .comparison .secti
 .mono, .step-number, .metric-value, .accuracy-summary-values strong, .candidate-name, .circuit-footer, .version, .section-index, .hero-kicker, .hero-readout, .hero-bottom, .method-track small, .demo-environment, .footer-bottom {
   font-family: "JetBrains Mono", monospace;
 }
-.app-shell { width: 100%; overflow: clip; }
+.app-shell { width: 100%; overflow: clip; color: var(--q-ink); }
+.app-shell h1, .app-shell h2, .app-shell h3, .app-shell h4, .app-shell a { color: inherit; }
 .topbar {
   position: sticky; top: 0; z-index: 10; height: 74px; padding: 0 clamp(20px, 4vw, 70px);
   background: #101115; border-bottom: 1px solid #34363d;
@@ -166,11 +167,39 @@ main { padding: 0; }
 .controls input[type="range"] { accent-color: var(--q-blue); }
 .controls input[type="checkbox"] { accent-color: var(--q-violet); }
 .preset-row button.active, .tabs button.active { border-color: var(--q-cyan); }
-.circuit-scroll { background-color: #11161a; }
-.gate.gate-h rect, .gate.gate-x rect, .gate.gate-sx rect { fill: #17404a; stroke: var(--q-cyan); }
-.gate.gate-measure rect { fill: #2c351b; stroke: var(--q-yellow); }
-.gate.gate-rz rect, .gate.gate-rx rect, .gate.gate-ry rect, .gate.gate-p rect { fill: #322345; stroke: var(--q-violet); }
-.gate.multi rect { fill: #442516; stroke: var(--q-orange); }
+.circuit-view + .circuit-view { border-top: 1px solid #4a4e5b; }
+.circuit-heading { align-items: start; gap: 18px; padding: 22px 22px 18px; }
+.circuit-heading h3 { font-size: clamp(17px, 1.5vw, 21px); }
+.circuit-heading p { font-size: 12px; line-height: 1.5; margin-top: 8px; }
+.circuit-scroll { background: #080a0e; max-height: 520px; padding: 18px 0; scrollbar-color: #747b8b #080a0e; }
+.circuit-scroll svg { display: block; }
+.wire { stroke: #bfc4cf; stroke-width: 1.25; }
+.wire-label { fill: #e7e9ee; font-size: 12px; }
+.gate text { fill: #fff; font-size: 12px; font-weight: 700; }
+.gate rect { fill: #8d6ad8; stroke: #b89cff; stroke-width: 1.5; }
+.gate.gate-h rect, .gate.gate-sx rect { fill: #347ced; stroke: #6bb2ff; }
+.gate.gate-x rect, .gate.gate-y rect, .gate.gate-z rect { fill: #d956a8; stroke: #ff95cc; }
+.gate.gate-rz rect, .gate.gate-rx rect, .gate.gate-ry rect, .gate.gate-p rect, .gate.gate-u rect { fill: #8f61d9; stroke: #bc9aff; }
+.gate.gate-measure rect { fill: #84b922; stroke: #c9ef65; }
+.gate.gate-cp rect, .gate.gate-crx rect, .gate.gate-cry rect, .gate.gate-crz rect { fill: #ee8132; stroke: #ffb773; }
+.gate.gate-cx .gate-link, .gate.gate-ccx .gate-link, .gate.gate-mcx .gate-link { stroke: #56dfe2; }
+.gate.gate-cx .control-dot, .gate.gate-ccx .control-dot, .gate.gate-mcx .control-dot { fill: #56dfe2; }
+.gate.gate-cx .target-circle, .gate.gate-ccx .target-circle, .gate.gate-mcx .target-circle { fill: #0f3236; stroke: #56dfe2; stroke-width: 2; }
+.gate.gate-swap .gate-link { stroke: #a4df53; stroke-width: 2.5; }
+.gate-changed rect, .gate-changed .target-circle { stroke: #f8e35c; stroke-width: 3; }
+.gate-changed .gate-link { stroke-width: 3; }
+.gate-changed { filter: drop-shadow(0 0 5px #f8e35c88); }
+.gate:hover rect, .gate:focus-visible rect { fill: #515fca; stroke: #fff; }
+.wire-visibility { display: block; width: fit-content; margin: 0 22px 12px; border: 1px solid #525969; background: #1a202a; color: #e2e8f0; padding: 8px 12px; font-size: 12px; }
+.wire-visibility:hover { border-color: var(--q-cyan); }
+.circuit-footer { font-size: 12px; color: #c0c4cd; padding: 14px 22px; }
+.circuit-delta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 1px solid #444851; border-bottom: 1px solid #444851; }
+.circuit-delta > div { padding: 20px 22px; display: flex; flex-direction: column; gap: 10px; }
+.circuit-delta > div + div { border-left: 1px solid #444851; }
+.circuit-delta > div > span { color: #b9bec8; font-size: 12px; }
+.circuit-delta strong { color: #f4f6f8; font-size: clamp(18px, 1.6vw, 24px); font-weight: 600; }
+.circuit-delta strong span { color: #8b94a5; font-size: .7em; font-weight: 400; }
+.circuit-delta p { grid-column: 1 / -1; padding: 0 22px 18px; margin: 0; color: #b9bec8; font-size: 12px; line-height: 1.5; }
 .research-section { margin: 0; padding-top: clamp(72px, 8vw, 115px); padding-bottom: clamp(85px, 9vw, 130px); background: #1a1c22; gap: 0; }
 .research-heading { width: 100%; }
 .research-heading h2 { font-size: clamp(40px, 4.5vw, 68px); }
@@ -231,6 +260,11 @@ footer { margin: 0; background: #0d0e11; padding: 60px clamp(20px, 4vw, 70px) 25
   .demo-environment { white-space: normal; text-align: right; max-width: 180px; }
 }
 @media (max-width: 560px) {
+  .circuit-delta { grid-template-columns: 1fr 1fr; }
+  .circuit-delta > div { padding: 16px; }
+  .circuit-delta > div:nth-child(3) { grid-column: 1 / -1; border-left: 0; border-top: 1px solid #444851; }
+  .circuit-delta p { padding: 0 16px 16px; }
+  .circuit-heading { flex-wrap: wrap; }
   .topbar { padding: 0 18px; }
   .topnav a:not(:last-child) { display: none; }
   .brand { font-size: 20px; }

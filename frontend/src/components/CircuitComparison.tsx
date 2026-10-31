@@ -1,6 +1,24 @@
 import { useEffect, useState } from "react";
-import type { Circuit, DemoResult } from "../types/demo";
+import type { Circuit, DemoResult, Gate } from "../types/demo";
 import { CircuitViewer } from "./CircuitViewer";
+
+function changedGateIds(source: Gate[], reference: Gate[]) {
+  const signature = (gate: Gate) =>
+    JSON.stringify([gate.name, gate.qubits, gate.params]);
+  const remaining = new Map<string, number>();
+  for (const gate of reference) {
+    const key = signature(gate);
+    remaining.set(key, (remaining.get(key) || 0) + 1);
+  }
+  const changed = new Set<number>();
+  for (const gate of source) {
+    const key = signature(gate);
+    const count = remaining.get(key) || 0;
+    if (count) remaining.set(key, count - 1);
+    else changed.add(gate.id);
+  }
+  return changed;
+}
 
 export function CircuitComparison({
   preview,
@@ -16,6 +34,16 @@ export function CircuitComparison({
   useEffect(() => {
     if (result) setTab("compiled");
   }, [result]);
+  const baselineCircuit = result?.baseline.circuit;
+  const selectedCircuit = result?.selected?.circuit;
+  const baselineChanged = baselineCircuit && selectedCircuit
+    ? changedGateIds(baselineCircuit.gates, selectedCircuit.gates)
+    : undefined;
+  const selectedChanged = baselineCircuit && selectedCircuit
+    ? changedGateIds(selectedCircuit.gates, baselineCircuit.gates)
+    : undefined;
+  const baselineMetrics = result?.baseline.metrics;
+  const selectedMetrics = result?.selected?.metrics;
   return (
     <section className="panel comparison">
       <div className="section-title justify-between">
@@ -46,11 +74,20 @@ export function CircuitComparison({
         />
       ) : result ? (
         <>
+          {selectedCircuit && (
+            <div className="circuit-delta" aria-label="Circuit changes">
+              <div><span>Depth</span><strong>{baselineMetrics?.depth ?? baselineCircuit?.depth} <span>to</span> {selectedMetrics?.depth ?? selectedCircuit.depth}</strong></div>
+              <div><span>Two-qubit gates</span><strong>{baselineMetrics?.n2q ?? "—"} <span>to</span> {selectedMetrics?.n2q ?? "—"}</strong></div>
+              <div><span>Gate-pattern changes</span><strong>{selectedChanged?.size ?? 0}</strong></div>
+              <p>Bright outlines mark gates with changed type, wire, or parameter. Both circuits remain equivalent.</p>
+            </div>
+          )}
           <CircuitViewer
             key={`base-${result.request.seed}`}
             circuit={result.baseline.circuit!}
             title="Baseline compilation"
             subtitle={`${result.request.backend} · optimization ${result.request.optimization_level} · original circuit`}
+            changedGateIds={baselineChanged}
           />
           {result.selected?.circuit ? (
             <CircuitViewer
@@ -58,6 +95,7 @@ export function CircuitComparison({
               circuit={result.selected.circuit}
               title="Selected compilation"
               subtitle={`${result.selected.strategy.replaceAll("+", " + ")} · seed ${result.selected.seed} · verified equivalent`}
+              changedGateIds={selectedChanged}
             />
           ) : (
             <div className="empty-selected">

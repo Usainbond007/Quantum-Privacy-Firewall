@@ -5,17 +5,25 @@ export function CircuitViewer({
   circuit,
   title,
   subtitle,
+  changedGateIds,
 }: {
   circuit: Circuit;
   title: string;
   subtitle?: string;
+  changedGateIds?: ReadonlySet<number>;
 }) {
   const [zoom, setZoom] = useState(1);
   const [gate, setGate] = useState<Gate | null>(null);
-  const rows = new Map(circuit.qubits.map((q, i) => [q, i]));
+  const [showAllWires, setShowAllWires] = useState(false);
+  const active = new Set(circuit.gates.flatMap((item) => item.qubits));
+  const canShowActiveOnly = circuit.qubits.length > 12 && active.size > 0 && active.size < circuit.qubits.length;
+  const visibleQubits = canShowActiveOnly && !showAllWires
+    ? circuit.qubits.filter((q) => active.has(q))
+    : circuit.qubits;
+  const rows = new Map(visibleQubits.map((q, i) => [q, i]));
   // Reserve the complete vertical span of multi-wire gates to avoid crossing
   // another gate in the same displayed column. Gate order is unchanged.
-  const occupied = circuit.qubits.map(() => 0);
+  const occupied = visibleQubits.map(() => 0);
   const columns = circuit.gates.map((g) => {
     const indices = g.qubits.map((q) => rows.get(q)!);
     const low = Math.min(...indices),
@@ -25,9 +33,9 @@ export function CircuitViewer({
     for (let row = low; row <= high; row++) occupied[row] = column;
     return column;
   });
-  const width = Math.max(480, 130 + Math.max(0, ...columns) * 66);
-  const height = Math.max(150, circuit.qubits.length * 54 + 35);
-  const y = (q: number) => 38 + rows.get(q)! * 54;
+  const width = Math.max(480, 130 + Math.max(0, ...columns) * 58);
+  const height = Math.max(150, visibleQubits.length * 46 + 30);
+  const y = (q: number) => 38 + rows.get(q)! * 46;
   return (
     <section className="circuit-view">
       <div className="circuit-heading">
@@ -56,6 +64,18 @@ export function CircuitViewer({
           </button>
         </div>
       </div>
+      {canShowActiveOnly && (
+        <button
+          type="button"
+          className="wire-visibility"
+          aria-pressed={showAllWires}
+          onClick={() => setShowAllWires((value) => !value)}
+        >
+          {showAllWires
+            ? `Show ${active.size} active wires`
+            : `Showing ${active.size} active wires · show all ${circuit.qubits.length}`}
+        </button>
+      )}
       <div className="circuit-scroll">
         <svg
           role="img"
@@ -64,7 +84,7 @@ export function CircuitViewer({
           height={height * zoom}
           viewBox={`0 0 ${width} ${height}`}
         >
-          {circuit.qubits.map((q) => (
+          {visibleQubits.map((q) => (
             <g key={q}>
               <text x="14" y={y(q) + 4} className="wire-label">
                 {circuit.layout ? `p${q}` : `q${q}`} |0⟩
@@ -79,7 +99,7 @@ export function CircuitViewer({
             </g>
           ))}
           {circuit.gates.map((g, index) => {
-            const x = 90 + columns[index] * 66;
+            const x = 90 + columns[index] * 58;
             const ys = g.qubits.map(y);
             const multi = g.qubits.length > 1;
             const label = g.name.toUpperCase();
@@ -97,7 +117,7 @@ export function CircuitViewer({
             return (
               <g
                 key={g.id}
-                className={`gate ${multi ? "multi" : ""} gate-${g.name.replace(/[^a-z0-9]/gi, "-")}`}
+                className={`gate ${multi ? "multi" : ""} gate-${g.name.replace(/[^a-z0-9]/gi, "-")} ${changedGateIds?.has(g.id) ? "gate-changed" : ""}`}
                 tabIndex={0}
                 role="button"
                 aria-label={`${label} on ${g.qubits.join(", ")}`}
@@ -147,9 +167,9 @@ export function CircuitViewer({
                     ) : (
                       <>
                         <rect
-                          x={x - 23}
+                          x={x - 21}
                           y={yy - 16}
-                          width="46"
+                          width="42"
                           height="32"
                           rx="6"
                         />
