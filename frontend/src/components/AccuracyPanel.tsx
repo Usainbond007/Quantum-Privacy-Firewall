@@ -88,7 +88,7 @@ function Prediction({
               : prediction.correct
                 ? "identified the family"
                 : "misclassified the family"}{" "}
-            · confidence score
+            · confidence, not accuracy
           </p>
           <div className="probability-bars">
             {Object.entries(prediction.probabilities)
@@ -163,7 +163,7 @@ export function AccuracyPanel({
           </div>
           <p className="hint">
             {result.attacker_note ||
-              "The attacker confidence is shown before and after QPF selection."}
+              "Confidence describes this single circuit; aggregate accuracy requires a test dataset."}
           </p>
           <div className="prediction-grid">
             <Prediction candidate={result.baseline} title="Baseline circuit" />
@@ -309,8 +309,9 @@ export function AccuracyPanel({
           </div>
           {data.metadata_confound_warning && (
             <p className="confound-note">
-              Metadata-only and full-feature attackers are shown side by side
-              to make the leakage channel transparent.
+              Metadata-only classification is nearly as strong as the full
+              attacker. Circuit size may explain much of the measured leakage.
+              The test set is small and the intervals are wide.
             </p>
           )}
           <details className="accuracy-details">

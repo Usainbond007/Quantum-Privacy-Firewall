@@ -7,7 +7,7 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import App from "../App";
+import App from "../LabApp";
 import { CircuitViewer } from "../components/CircuitViewer";
 import { CircuitComparison } from "../components/CircuitComparison";
 import { api } from "../lib/api";
@@ -173,6 +173,7 @@ describe("full frontend workflow", () => {
     const user = userEvent.setup();
     vi.spyOn(api, "options").mockResolvedValue(options);
     render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: "Circuit workbench" }));
     const overview = screen.getByRole("region", {
       name: "Before and after firewall accuracy",
     });
@@ -221,6 +222,7 @@ describe("full frontend workflow", () => {
     const user = userEvent.setup();
     vi.spyOn(api, "options").mockResolvedValue(options);
     render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: "Circuit workbench" }));
     const overview = await screen.findByRole("region", {
       name: "Before and after firewall accuracy",
     });
@@ -258,6 +260,7 @@ describe("full frontend workflow", () => {
       .mockResolvedValue({ id: "test-run", status: "queued" });
     vi.spyOn(api, "run").mockResolvedValue(completed);
     render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: "Circuit workbench" }));
     await user.click(
       await screen.findByRole("button", { name: "Preview input circuit" }),
     );
@@ -284,6 +287,7 @@ describe("full frontend workflow", () => {
     vi.spyOn(api, "options").mockResolvedValue(options);
     vi.spyOn(api, "start").mockRejectedValue(new Error("Demo queue is full"));
     render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: "Circuit workbench" }));
     await user.click(
       await screen.findByRole("button", { name: /Run firewall/ }),
     );
