@@ -9,7 +9,7 @@
 
 **A Qiskit-based framework for measuring and reducing algorithmic-intent leakage from transpiled quantum circuits.**
 
-Developed by **Fork Around & Find Out** for **Q-Hack India 2026**, Quantum Security & Cryptography track.
+Developed by **Fork Around & Find Out** for **Q-Hack India 2026 Finals**, Quantum Security & Cryptography track.
 
 ## The Problem
 
